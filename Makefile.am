@@ -8,13 +8,7 @@ SUBDIRS                 = src test include
 DIST_SUBDIRS = $(SUBDIRS)
 
 # All the rest of the distributed files
-EXTRA_DIST              = \
-	BUGS		\
-	TODO		\
-	COPYING		\
-	AUTHORS		\
-	INSTALL		\
-	README
+EXTRA_DIST = libayemu.spec
 
 # Rule to build tar-gzipped distribution package
 $(PACKAGE)-$(VERSION).tar.gz: dist

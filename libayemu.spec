@@ -10,6 +10,7 @@ License: GPL
 Group: System Environment/Libraries
 Source0: http://sashnov.fanstvo.com/%{name}-%{version}.tar.gz
 Source1: %{name}-%{version}.tar.gz
+Packager: Sashnov Alexander <sashnov@ngs.ru>
 URL: http://sashnov.nm.ru/libayemu.html
 BuildRoot: %{_tmppath}/%{name}-root
 Requires: /sbin/ldconfig
