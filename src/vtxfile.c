@@ -5,8 +5,9 @@
 
 static const int DEBUG = 0;
 
-/* imports from lh5dec.c */
-extern void lh5_decode(unsigned char *outp, unsigned char *inp, long packed_size, long original_size);
+/* defined in lh5dec.c */
+void lh5_decode(unsigned char *inp,unsigned char *outp,unsigned long original_size, unsigned long packed_size);
+
 
 /* read 16 bit integer from file */
 static int read_word (FILE *fp)
@@ -163,7 +164,7 @@ void * ayemu_vtx_load_data (ayemu_vtx_t *vtx)
       free (packed_data);
       return NULL;
     }
-  lh5_decode (vtx->regdata, packed_data, packed_size, vtx->regdata_size);
+  lh5_decode (packed_data, vtx->regdata, vtx->regdata_size, packed_size);
   free (packed_data);
 
   // указатель на начало данных
