@@ -196,17 +196,12 @@ int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, void *regs)
 /* Free all of allocaded resource for this file. */
 void ayemu_vtx_free (ayemu_vtx_t *vtx)
 {
-  if (vtx->fp)
-
-    {
-      fclose (vtx->fp);
-      vtx->fp = NULL;
-    }
-
-  if (vtx->regdata)
-
-    {
-      free (vtx->regdata);
-      vtx->regdata = NULL;
-    }
+  if (vtx->fp) {
+    fclose (vtx->fp);
+    vtx->fp = NULL;
+  }
+  if (vtx->regdata) {
+    free (vtx->regdata);
+    vtx->regdata = NULL;
+  }
 }
