@@ -21,11 +21,11 @@ BEGIN_C_DECLS
 typedef struct
 {
   /* File header */
-  char *Chip;			/* Type of sound chip (pointer to string "ay" or "ym") */
-  uint8_t Stereo;			/* Type of stereo: 0-ABC, 1-BCA... (see VTX format description) */
+  char    *Chip;			/* Type of sound chip (pointer to string "ay" or "ym") */
+  uint8_t  Stereo;			/* Type of stereo: 0-ABC, 1-BCA... (see VTX format description) */
   uint16_t Loop;			/* song loop */
-  int ChipFreq;			/* AY chip freq (1773400 for ZX) */
-  uint8_t PlayerFreq;		/* 50 Hz for ZX, 60 Hz for yamaha */
+  int      ChipFreq;			/* AY chip freq (1773400 for ZX) */
+  uint8_t  PlayerFreq;		        /* 50 Hz for ZX, 60 Hz for yamaha */
   uint16_t Year;			/* year song composed */
 
   /* following data from var-lenght strings */
@@ -35,8 +35,6 @@ typedef struct
   char Tracker [AYEMU_VTX_NTSTRING_MAX+1];
   char Comment [AYEMU_VTX_NTSTRING_MAX+1];
  
-  /* end file format data */
-
   /* decoded from lha data part */
   uint8_t *regdata;		/* NULL if not loaded */
   size_t regdata_size;
@@ -51,11 +49,11 @@ typedef struct
   
   /* Read and encode lha data from .vtx file.
        Return pointer to unpacked data or NULL */
-  extern void * ayemu_vtx_load_data (ayemu_vtx_t *vtx);
+  extern char *ayemu_vtx_load_data (ayemu_vtx_t *vtx);
   
   /* Get next 14-bytes frame of AY register data.
      Return value: true if sucess, false if not enought data. */
-  extern int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, void *regs);
+  extern int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, char *regs);
   
    /* Free all of allocaded resource for this file.
     You must call this function on end work with vtx file */

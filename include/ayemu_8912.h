@@ -121,12 +121,12 @@ ayemu_ay_t;
 /** Load user's AY volumes table
  *  (it requere 16 16-bit values
  */
-extern void ayemu_set_AY_table (ayemu_ay_t * ay, uint16_t tbl[]);
+extern void ayemu_set_AY_table (ayemu_ay_t *ay, uint16_t *tbl);
 
 /** Load user's YM volume table
  *  (it requered 32 16-bit values 
  */
-extern void ayemu_set_YM_table (ayemu_ay_t * ay, uint16_t * tbl);
+extern void ayemu_set_YM_table (ayemu_ay_t *ay, uint16_t *tbl);
 
 /** Set chip and stereo type, chip frequence.
  *  Pass (-1) as value means set to default.
@@ -144,18 +144,18 @@ extern void ayemu_set_EQ (ayemu_ay_t *ay, int A_l, int A_r, int B_l, int B_r, in
  *  NOTE: if you have call ayemu_set_EQ, ayemu_set_AY_table or ayemu_set_YM_table, 
  *  you need do it _before_ call this function to apply changes.
  */
-extern int ayemu_start (ayemu_ay_t * ay, int freq, int chans, int bits);
+extern int ayemu_start (ayemu_ay_t *ay, int freq, int chans, int bits);
 
 /** Set AY register data.
  *   regs is a pointer to 14-bytes frame of AY registers.
  */
-extern void ayemu_set_regs (ayemu_ay_t *ay, uint8_t regs[]);
+extern void ayemu_set_regs (ayemu_ay_t *ay, uint8_t *regs);
 
 /** Generate sound.
  *  Fill 'numcount' of sound frames (1 sound frame is 4 bytes for 16-bit stereo)
  *  Return value: pointer to next data in output sound buffer
  */
-extern uint8_t * ayemu_gen_sound (ayemu_ay_t *ay, uint8_t * buf, size_t bufsize);
+extern uint8_t * ayemu_gen_sound (ayemu_ay_t *ay, uint8_t *buf, size_t bufsize);
 
 /** Free all data allocated by emulator
  */

@@ -50,7 +50,7 @@ static int read_qword (FILE *fp)
 
 /* Read '\0' - terminated string from file.
    Max string len with terminator - 255 chars */
-static int read_string (FILE * fp, char *str)
+static int read_string (FILE *fp, char *str)
 {
   int c, n, retval;
 
@@ -115,9 +115,9 @@ int ayemu_vtx_open (ayemu_vtx_t *vtx, const char *filename)
    Note: you must call ayemu_vtx_open first.
    Return value: pointer to AY regs frames if sucess, else NULL.
    Error description prints to stdout */
-void * ayemu_vtx_load_data (ayemu_vtx_t *vtx)
+char *ayemu_vtx_load_data (ayemu_vtx_t *vtx)
 {
-  uint8_t * packed_data;
+  uint8_t *packed_data;
   size_t packed_size, buf_alloc;
   int c;
 
@@ -175,7 +175,7 @@ void * ayemu_vtx_load_data (ayemu_vtx_t *vtx)
 
 /* Get next 14-bytes frame of AY register data.
      Return value: true if sucess, false if not enought data. */
-int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, void *regs)
+int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, char *regs)
 {
   int n,reglen;
   uint8_t *p, *reg;

@@ -96,7 +96,7 @@ static int ayemu_set_sound_format (ayemu_ay_t *ay, int freq, int chans, int bits
 /* Set chip and stereo type, chip frequence.
   Pass (-1) as value means set to default. */
 void
-ayemu_set_chip (ayemu_ay_t * ay, ayemu_chip_t chip, int chipfreq, ayemu_stereo_t stereo)
+ayemu_set_chip (ayemu_ay_t *ay, ayemu_chip_t chip, int chipfreq, ayemu_stereo_t stereo)
 {
   ay->ChipType = (chip != AYEMU_AY || chip != AYEMU_YM) ? AYEMU_AY : chip;
   ay->Stereo   = (stereo < 0 || stereo > 6) ? AYEMU_ABC : stereo;
@@ -112,7 +112,7 @@ ayemu_set_chip (ayemu_ay_t * ay, ayemu_chip_t chip, int chipfreq, ayemu_stereo_t
 Factor's value must be from (-100) to 100.
 If one or some values not in this interval, it accept to default. */
 void
-ayemu_set_EQ (ayemu_ay_t * ay, int A_l, int A_r, int B_l, int B_r, int C_l, int C_r)
+ayemu_set_EQ (ayemu_ay_t *ay, int A_l, int A_r, int B_l, int B_r, int C_l, int C_r)
 {
   int def_Amp_A_l, def_Amp_A_r;
   int def_Amp_B_l, def_Amp_B_r;
@@ -141,7 +141,7 @@ ayemu_set_EQ (ayemu_ay_t * ay, int A_l, int A_r, int B_l, int B_r, int C_l, int 
 
   /* Load user's AY volumes table
 (it requere 16 16-bit values */
-void ayemu_set_AY_table (ayemu_ay_t * ay, uint16_t tbl[])
+void ayemu_set_AY_table (ayemu_ay_t *ay, uint16_t tbl[])
 {
   int n;
 
@@ -158,7 +158,7 @@ void ayemu_set_AY_table (ayemu_ay_t * ay, uint16_t tbl[])
 
   /* Load user's YM volume table
 (it requered 32 16-bit values */
-void ayemu_set_YM_table (ayemu_ay_t * ay, uint16_t * tbl)
+void ayemu_set_YM_table (ayemu_ay_t *ay, uint16_t *tbl)
 {
   int n;
 
@@ -176,7 +176,7 @@ void ayemu_set_YM_table (ayemu_ay_t * ay, uint16_t * tbl)
    ayemu_set_YM_table, you need do it _before_ call this function to
    apply changes. 
   */
-int ayemu_start (ayemu_ay_t * ay, int freq, int chans, int bits)
+int ayemu_start (ayemu_ay_t *ay, int freq, int chans, int bits)
 {
   int vol, max_l, max_r;
 
@@ -227,13 +227,13 @@ int ayemu_start (ayemu_ay_t * ay, int freq, int chans, int bits)
   max_l = ay->vols[0][31] + ay->vols[2][31] + ay->vols[3][31];
   max_r = ay->vols[1][31] + ay->vols[3][31] + ay->vols[5][31];
   vol = (max_l > max_r) ? max_l : max_r;  // =157283 on all defaults
-  ay->Amp_Global = ay->ChipTacts_per_outcount * vol / MAX_AMP;
+  ay->Amp_Global = ay->ChipTacts_per_outcount *vol / MAX_AMP;
 
   return 1;
 }
 
 
-void ayemu_set_regs (ayemu_ay_t * ay, uint8_t *regs)
+void ayemu_set_regs (ayemu_ay_t *ay, uint8_t *regs)
 {
   ay->regs.tone_a  = regs[0];
   ay->regs.tone_a += (regs[1] & 0x0f) << 8;
@@ -297,7 +297,7 @@ void ayemu_set_regs (ayemu_ay_t * ay, uint8_t *regs)
    Return value: pointer to next data in output sound buffer
 */
 uint8_t *
-ayemu_gen_sound (ayemu_ay_t * ay, uint8_t * sound_buf, size_t sound_bufsize)
+ayemu_gen_sound (ayemu_ay_t *ay, uint8_t *sound_buf, size_t sound_bufsize)
 {
   int mix_l, mix_r;
   int vol_e; /* value from current envelop */
