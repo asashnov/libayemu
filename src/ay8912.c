@@ -86,9 +86,9 @@ static int ayemu_set_sound_format (ayemu_ay_t *ay, int freq, int chans, int bits
   if ((bits != 16 && bits != 8) || (chans != 2 && chans != 1))
     return 0;
 
-  ay->output_freq = freq;
-  ay->output_channels = chans;
-  ay->output_bpc = bits;
+  ay->sndfmt.freq = freq;
+  ay->sndfmt.channels = chans;
+  ay->sndfmt.bpc = bits;
 
   return 1;
 }
@@ -190,7 +190,7 @@ int ayemu_start (ayemu_ay_t * ay, int freq, int chans, int bits)
 
   ayemu_set_sound_format (ay, freq, chans, bits);
 
-  ay->ChipTacts_per_outcount = ay->ChipFreq / ay->output_freq / 8;
+  ay->ChipTacts_per_outcount = ay->ChipFreq / ay->sndfmt.freq / 8;
 
   /* If equlaizer is not init yet set defaults */
   //  if (! ay->bEQSet)
@@ -235,40 +235,40 @@ int ayemu_start (ayemu_ay_t * ay, int freq, int chans, int bits)
 
 void ayemu_set_regs (ayemu_ay_t * ay, uint8_t *regs)
 {
-  ay->reg_tone_a  = regs[0];
-  ay->reg_tone_a += (regs[1] & 0x0f) << 8;
+  ay->regs.tone_a  = regs[0];
+  ay->regs.tone_a += (regs[1] & 0x0f) << 8;
   if (DEBUG && (regs[1] & 0xf0))
     printf ("Warning: Possible invalid register data: R1 has some of bit 7-4.\n");
 
-  ay->reg_tone_b  = regs[2];
-  ay->reg_tone_b += (regs[3] & 0x0f) << 8;
+  ay->regs.tone_b  = regs[2];
+  ay->regs.tone_b += (regs[3] & 0x0f) << 8;
   if (DEBUG && (regs[3] & 0xf0))
     printf ("Warning: Possible invalid register data: R3 has some of bit 7-4.\n");
 
-  ay->reg_tone_c  = regs[4];
-  ay->reg_tone_c += (regs[5] & 0x0f) << 8;
+  ay->regs.tone_c  = regs[4];
+  ay->regs.tone_c += (regs[5] & 0x0f) << 8;
   if (DEBUG && (regs[5] & 0xf0))
     printf ("Warning: Possible invalid register data: R5 has some of bit 7-4.\n");
 
-  ay->reg_noise = regs[6] & 0x1f;
+  ay->regs.noise = regs[6] & 0x1f;
   if (DEBUG && (regs[6] & 0xe0))
     printf ("Warning: Possible invalid register data: R6 has some of bit 7-5.\n");
 
-  ay->reg_R7_tone_a  = ! (regs[7] & 0x01);
-  ay->reg_R7_tone_b  = ! (regs[7] & 0x02);
-  ay->reg_R7_tone_c  = ! (regs[7] & 0x04);
-  ay->reg_R7_noise_a = ! (regs[7] & 0x08);
-  ay->reg_R7_noise_b = ! (regs[7] & 0x10);
-  ay->reg_R7_noise_c = ! (regs[7] & 0x20);
+  ay->regs.R7_tone_a  = ! (regs[7] & 0x01);
+  ay->regs.R7_tone_b  = ! (regs[7] & 0x02);
+  ay->regs.R7_tone_c  = ! (regs[7] & 0x04);
+  ay->regs.R7_noise_a = ! (regs[7] & 0x08);
+  ay->regs.R7_noise_b = ! (regs[7] & 0x10);
+  ay->regs.R7_noise_c = ! (regs[7] & 0x20);
 
   /* set value to (-1) if use envelop */
-  ay->reg_vol_a = regs[8]  & 0x0f;
-  ay->reg_vol_b = regs[9]  & 0x0f;
-  ay->reg_vol_c = regs[10] & 0x0f;
+  ay->regs.vol_a = regs[8]  & 0x0f;
+  ay->regs.vol_b = regs[9]  & 0x0f;
+  ay->regs.vol_c = regs[10] & 0x0f;
 
-  ay->reg_env_a = regs[8]  & 0x10;
-  ay->reg_env_b = regs[9]  & 0x10;
-  ay->reg_env_c = regs[10] & 0x10;
+  ay->regs.env_a = regs[8]  & 0x10;
+  ay->regs.env_b = regs[9]  & 0x10;
+  ay->regs.env_c = regs[10] & 0x10;
 
   if (DEBUG && (regs[8] & 0xe0))
     printf ("Warning: Possible invalid register data: R8 has some of bit 7-5.\n");
@@ -277,12 +277,12 @@ void ayemu_set_regs (ayemu_ay_t * ay, uint8_t *regs)
   if (DEBUG && (regs[10] & 0xe0))
     printf ("Warning: Possible invalid register data: R10 has some of bit 7-5.\n");
 
-  ay->reg_env_freq  = regs[11];
-  ay->reg_env_freq += regs[12] << 8;
+  ay->regs.env_freq  = regs[11];
+  ay->regs.env_freq += regs[12] << 8;
 
   if (regs[13] != 255)
     {
-      ay->reg_env_style = regs[13] & 0x0f;
+      ay->regs.env_style = regs[13] & 0x0f;
       ay->EnvPos = 0;
       ay->CntE = 0;
     }
@@ -306,7 +306,7 @@ ayemu_gen_sound (ayemu_ay_t * ay, uint8_t * sound_buf, size_t sound_bufsize)
   int snd_numcount;
 
   /* sound buffer size must be divide on 4 */
-  snd_numcount = sound_bufsize / (ay->output_channels * (ay->output_bpc >> 3));
+  snd_numcount = sound_bufsize / (ay->sndfmt.channels * (ay->sndfmt.bpc >> 3));
 
   for (n=0; n < snd_numcount; n++)
     {
@@ -317,24 +317,24 @@ ayemu_gen_sound (ayemu_ay_t * ay, uint8_t * sound_buf, size_t sound_bufsize)
       for (m = 0 ; m < ay->ChipTacts_per_outcount ; m++)
 	{
 	  /* increate channel counters */
-	  if (++ay->CntA >= ay->reg_tone_a) 
+	  if (++ay->CntA >= ay->regs.tone_a) 
 	    {
 	      ay->CntA = 0;
 	      ay->BitA = ! ay->BitA;
 	    }
-	  if (++ay->CntB >= ay->reg_tone_b)
+	  if (++ay->CntB >= ay->regs.tone_b)
 	    {
 	      ay->CntB = 0;
 	      ay->BitB = ! ay->BitB;
 	    }
-	  if (++ay->CntC >= ay->reg_tone_c)
+	  if (++ay->CntC >= ay->regs.tone_c)
 	    {
 	      ay->CntC = 0;
 	      ay->BitC = ! ay->BitC;
 	    }
 
 	  /* GenNoise (c) Hacker KAY & Sergey Bulba */
-	  if (++ay->CntN >= (ay->reg_noise * 2))
+	  if (++ay->CntN >= (ay->regs.noise * 2))
 	    {
 	      ay->CntN = 0;
 	      ay->Cur_Seed = (ay->Cur_Seed * 2 + 1) ^ \
@@ -343,38 +343,38 @@ ayemu_gen_sound (ayemu_ay_t * ay, uint8_t * sound_buf, size_t sound_bufsize)
 	    }
 
 	  /* gen envelope */
-	  if (++ay->CntE >= ay->reg_env_freq)
+	  if (++ay->CntE >= ay->regs.env_freq)
 	    {
 	      ay->CntE = 0;
 	      if (++ay->EnvPos > 127)
 		ay->EnvPos = 64;
 	    }
 
-	  vol_e = Envelope [ay->reg_env_style] [ay->EnvPos];
+	  vol_e = Envelope [ay->regs.env_style] [ay->EnvPos];
 
 	  /* channel A */
-	  if ((ay->BitA | !ay->reg_R7_tone_a) & (ay->BitN | !ay->reg_R7_noise_a))
+	  if ((ay->BitA | !ay->regs.R7_tone_a) & (ay->BitN | !ay->regs.R7_noise_a))
 	    {
-	      vol = (ay->reg_env_a)? vol_e : 
-		ay->reg_vol_a * 2 + 1;   /* 15 * 2 + 1 = 31 max */
+	      vol = (ay->regs.env_a)? vol_e : 
+		ay->regs.vol_a * 2 + 1;   /* 15 * 2 + 1 = 31 max */
 	      mix_l += ay->vols[0][vol];
 	      mix_r += ay->vols[1][vol];
 	    }
 
 	  /* channel B */
-	  if ((ay->BitB | !ay->reg_R7_tone_b) & (ay->BitN | !ay->reg_R7_noise_b))
+	  if ((ay->BitB | !ay->regs.R7_tone_b) & (ay->BitN | !ay->regs.R7_noise_b))
 	    {
-	      vol =(ay->reg_env_b)? vol_e : 
-		ay->reg_vol_b * 2 + 1;
+	      vol =(ay->regs.env_b)? vol_e : 
+		ay->regs.vol_b * 2 + 1;
 	      mix_l += ay->vols[2][vol];
 	      mix_r += ay->vols[3][vol];
 	    }
 
 	  /* channel C */
-	  if ((ay->BitC | !ay->reg_R7_tone_c) & (ay->BitN | !ay->reg_R7_noise_c))
+	  if ((ay->BitC | !ay->regs.R7_tone_c) & (ay->BitN | !ay->regs.R7_noise_c))
 	    {
-	      vol = (ay->reg_env_c)? vol_e : 
-		ay->reg_vol_c * 2 + 1;
+	      vol = (ay->regs.env_c)? vol_e : 
+		ay->regs.vol_c * 2 + 1;
 	      mix_l += ay->vols[4][vol];
 	      mix_r += ay->vols[5][vol];
 	    }
@@ -384,7 +384,7 @@ ayemu_gen_sound (ayemu_ay_t * ay, uint8_t * sound_buf, size_t sound_bufsize)
       mix_l /= ay->Amp_Global;
       mix_r /= ay->Amp_Global;
      
-      if (ay->output_bpc == 8)
+      if (ay->sndfmt.bpc == 8)
 	{
 	  mix_l = (mix_l >> 8) | 128; /* 8 bit sound */
 	  mix_r = (mix_r >> 8) | 128;

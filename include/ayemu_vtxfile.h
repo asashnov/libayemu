@@ -13,6 +13,11 @@
 
 BEGIN_C_DECLS
 
+/** VTX file format header and status of open file
+ * 
+ * This structure used for save VTX file format header
+ * and for temporary save current state also.
+ */
 typedef struct
 {
   /* File header */
