@@ -98,9 +98,9 @@ static int ayemu_set_sound_format (ayemu_ay_t *ay, int freq, int chans, int bits
 void
 ayemu_set_chip (ayemu_ay_t * ay, ayemu_chip_t chip, int chipfreq, ayemu_stereo_t stereo)
 {
-  ay->ChipType = (chip == -1) ? AYEMU_AY : chip;
-  ay->Stereo   = (stereo == -1) ? AYEMU_ABC : stereo;
-  ay->ChipFreq = (chipfreq == -1) ? AYEMU_DEFAULT_CHIP_FREQ : chipfreq;
+  ay->ChipType = (chip != AYEMU_AY || chip != AYEMU_YM) ? AYEMU_AY : chip;
+  ay->Stereo   = (stereo < 0 || stereo > 6) ? AYEMU_ABC : stereo;
+  ay->ChipFreq = (chipfreq < 0) ? AYEMU_DEFAULT_CHIP_FREQ : chipfreq;
   ay->bChip = 1;
   
   /* Re-gen internal volume table */
