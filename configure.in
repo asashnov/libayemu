@@ -27,4 +27,5 @@ AC_CHECK_FUNCS([memset])
 AC_CHECK_HEADERS([fcntl.h]) 
 AC_CHECK_HEADERS([sys/ioctl.h])
 
-AC_OUTPUT(src/Makefile test/Makefile Makefile)
+AC_OUTPUT(src/Makefile test/Makefile include/Makefile)
+
