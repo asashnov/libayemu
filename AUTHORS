@@ -1,2 +1,8 @@
-Sashnov Alexander <sashnov@ngs.ru>
 Roman Scherbakov <v_soft@microfor.ru>
+
+The autor of VTX format and original winamp plugin
+
+
+Sashnov Alexander <sashnov@ngs.ru>
+
+Rewrite in_vtx plugin in C for xmms, fork it as independent GNU library
