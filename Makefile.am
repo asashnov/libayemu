@@ -8,7 +8,7 @@ SUBDIRS                 = src test include
 DIST_SUBDIRS = $(SUBDIRS)
 
 # All the rest of the distributed files
-EXTRA_DIST = libayemu.spec
+EXTRA_DIST = libayemu.spec Doxyfile
 
 # Rule to build tar-gzipped distribution package
 $(PACKAGE)-$(VERSION).tar.gz: dist

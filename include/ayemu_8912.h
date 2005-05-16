@@ -2,7 +2,6 @@
 #define _AYEMU_ay8912_h
 
 #include <stddef.h>
-#include <stdint.h>
 
 BEGIN_C_DECLS
 
@@ -11,26 +10,16 @@ BEGIN_C_DECLS
  *  The stereo types codes used for generage sound.
  */
 typedef enum
-  {
-    AYEMU_MONO = 0,
-    AYEMU_ABC,
-    AYEMU_ACB,
-    AYEMU_BAC,
-    AYEMU_BCA,
-    AYEMU_CAB,
-    AYEMU_CBA
-  }
+{
+  AYEMU_MONO = 0,
+  AYEMU_ABC,
+  AYEMU_ACB,
+  AYEMU_BAC,
+  AYEMU_BCA,
+  AYEMU_CAB,
+  AYEMU_CBA
+}
 ayemu_stereo_t;
-
-
-/** Sound chip type */
-typedef enum
-  {
-    AYEMU_AY = 0,
-    AYEMU_YM
-  }
-ayemu_chip_t;
-
 
 /** AY registers data */
 typedef struct
@@ -83,7 +72,7 @@ typedef struct
   ayemu_stereo_t Stereo;  /* stereo layout (MONO, ABC, BAC, ACB...) */
 
   /* AY/YM volumes */
-  uint16_t AYVol[32], YMVol[32];
+  int AYVol[32], YMVol[32];
 
   int Layout [6]; /** current mixer layaut A left, A right, B_l, B_r, C_l, C_r; */
 
@@ -105,15 +94,15 @@ typedef struct
   int bYM_table;          /* YM table init flag */
 
   /*  -- internal variables -- */
-  int EnvNum;		  /* current envilopment number (от 0 до 15) */
-  int EnvPos;		  /* envilop position (от 0 до 127) */
+  int EnvNum;		  /* current envilopment number (0...15) */
+  int env_pos;		  /* envilop position (0...127) */
   int Cur_Seed; // = 0xffff;  /* random numbers counter */
 
   /* bits streams */
-  int BitA, BitB, BitC, BitN;  /* current generator state */
+  int bit_a, bit_b, bit_c, bit_n;  /* current generator state */
 
   /* back counters */
-  int CntA,  CntB, CntC, CntE, CntN;
+  int cnt_a, cnt_b, cnt_c, cnt_n, cnt_e;
 }
 ayemu_ay_t;
 
@@ -121,45 +110,47 @@ ayemu_ay_t;
 /** Load user's AY volumes table
  *  (it requere 16 16-bit values
  */
-extern void ayemu_set_AY_table (ayemu_ay_t *ay, uint16_t *tbl);
+extern DECLSPEC void ayemu_set_AY_table (ayemu_ay_t *ay, Uint16 *tbl);
 
 /** Load user's YM volume table
  *  (it requered 32 16-bit values 
  */
-extern void ayemu_set_YM_table (ayemu_ay_t *ay, uint16_t *tbl);
+extern DECLSPEC void ayemu_set_YM_table (ayemu_ay_t *ay, Uint16 *tbl);
 
 /** Set chip and stereo type, chip frequence.
  *  Pass (-1) as value means set to default.
  */
-extern void ayemu_set_chip (ayemu_ay_t *ay, ayemu_chip_t chip, int chipfreq, ayemu_stereo_t stereo);
+extern DECLSPEC void ayemu_set_chip (ayemu_ay_t *ay, ayemu_chip_t chip, int chipfreq, ayemu_stereo_t stereo);
 
 /** Set amplitude factor for each of channels (A,B anc C, tone and noise).
  *  Factor's value must be from (-100) to 100.
  *  If one or some values not in this interval, it accept to default.
  */
-extern void ayemu_set_EQ (ayemu_ay_t *ay, int A_l, int A_r, int B_l, int B_r, int C_l, int C_r);
+extern DECLSPEC void ayemu_set_EQ (ayemu_ay_t *ay, int A_l, int A_r, int B_l, int B_r, int C_l, int C_r);
 
 /** Reset AY, generate internal volume tables
+ *
  *  (by chip type, sound format and amplitude factors).
  *  NOTE: if you have call ayemu_set_EQ, ayemu_set_AY_table or ayemu_set_YM_table, 
  *  you need do it _before_ call this function to apply changes.
  */
-extern int ayemu_start (ayemu_ay_t *ay, int freq, int chans, int bits);
+extern DECLSPEC int ayemu_start (ayemu_ay_t *ay, int freq, int chans, int bits);
 
 /** Set AY register data.
- *   regs is a pointer to 14-bytes frame of AY registers.
+ *
+ * regs is a pointer to 14-bytes frame of AY registers.
  */
-extern void ayemu_set_regs (ayemu_ay_t *ay, uint8_t *regs);
+extern DECLSPEC void ayemu_set_regs (ayemu_ay_t *ay, char *regs);
 
 /** Generate sound.
  *  Fill 'numcount' of sound frames (1 sound frame is 4 bytes for 16-bit stereo)
  *  Return value: pointer to next data in output sound buffer
  */
-extern uint8_t * ayemu_gen_sound (ayemu_ay_t *ay, uint8_t *buf, size_t bufsize);
+extern DECLSPEC unsigned char * ayemu_gen_sound (ayemu_ay_t *ay, unsigned char *buf, size_t bufsize);
 
 /** Free all data allocated by emulator
  */
-extern void ayemu_free (ayemu_ay_t *ay);
+extern DECLSPEC void ayemu_free (ayemu_ay_t *ay);
 
 END_C_DECLS
 

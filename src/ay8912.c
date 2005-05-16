@@ -1,102 +1,135 @@
 #include "ayemu.h"
 
-static const int DEBUG = 0;
+static const char VERSION[] = "libayemu 0.9";
 
-/* Max amplitude value for stereo signal.
-   Selected is 24575 for possible folowwing SSRC for clipping escape
+enum {
+  AYEMU_MAX_AMP = 24575, /** Max amplitude value for stereo signal for avoiding for possible folowwing SSRC for clipping */
+  AYEMU_EQ_DEFAULT = 255,
+  AYEMU_CHIP_DEFAULT = -1,
+  AYEMU_DEFAULT_CHIP_FREQ = 1773400
+};
 
-original russian comment:
-   Максимальная амплитуда возможная при проигрывании стерео сигнала
-   24575 выбрано для последующего введения SSRC для избежания клиппинга
+/* AY/YM volume tables (16 elements for AY, 32 for YM)
+ * (c) by V_Soft and Lion 17
  */
-#define MAX_AMP                     24575
-
-const int AYEMU_DEFAULT_CHIP_FREQ = 1773400;
-
-/* Prepare work volumes array (included AY table and mixer settings) */
-static void GenVol (ayemu_ay_t *ay);	
-
-
-/* AY/YM volume tables (16 elements for AY, 32 for YM) */
-/* (c) by V_Soft and Lion 17 */
-static uint16_t 
-Lion17_AY_table [16] = {
+static Uint16 Lion17_AY_table [16] = {
   0, 513, 828, 1239, 1923, 3238, 4926, 9110, 10344, 17876, 24682, 30442,
   38844, 47270, 56402, 65535
 };
-static uint16_t 
-Lion17_YM_table [32] = {
+
+static Uint16 Lion17_YM_table [32] = {
   0, 0, 190, 286, 375, 470, 560, 664, 866, 1130, 1515, 1803, 2253,
   2848, 3351, 3862, 4844, 6058, 7290, 8559, 10474, 12878, 15297, 17787,
   21500, 26172, 30866, 35676, 42664, 50986, 58842, 65535
 };
 
-
 /* (c) by Hacker KAY */
-static  uint16_t 
-KAY_AY_table [16] = {
+static  Uint16 KAY_AY_table [16] = {
   0, 836, 1212, 1773, 2619, 3875, 5397, 8823, 10392, 16706, 23339, 29292,
   36969, 46421, 55195, 65535
 };
-static  uint16_t 
-KAY_YM_table [32] = {
+
+static  Uint16 KAY_YM_table [32] = {
   0, 0, 248, 450, 670, 826, 1010, 1239, 1552, 1919, 2314, 2626, 3131, 3778,
   4407, 5031, 5968, 7161, 8415, 9622, 11421, 13689, 15957, 18280, 21759,
   26148, 30523, 34879, 41434, 49404, 57492, 65535
 };
 
-
 /* default equlaizer (layout) settings for AY and YM, 7 stereo types */
-static const int
-default_layout [2][7][6] = {
-{ /* for AY */
-   /*   A_l  A_r  B_l  B_r  C_l  C_r */
-  {100, 100, 100, 100, 100, 100},	// _MONO
-  {100, 33, 70, 70, 33, 100},	// _ABC
-  {100, 33, 33, 100, 70, 70},	// _ACB
-  {70, 70, 100, 33, 33, 100},	// _BAC
-  {33, 100, 100, 33, 70, 70},	// _BCA
-  {70, 70, 33, 100, 100, 33},	// _CAB
-  {33, 100, 70, 70, 100, 33} }  // _CBA
-, { /* for YM */
+static const int default_layout [2][7][6] = {
+  { /* for AY */
+    /*   A_l  A_r  B_l  B_r  C_l  C_r */
+    {100, 100, 100, 100, 100, 100},	// _MONO
+    {100, 33, 70, 70, 33, 100},	   // _ABC
+    {100, 33, 33, 100, 70, 70},	   // _ACB
+    {70, 70, 100, 33, 33, 100},	   // _BAC
+    {33, 100, 100, 33, 70, 70},	   // _BCA
+    {70, 70, 33, 100, 100, 33},	   // _CAB
+    {33, 100, 70, 70, 100, 33}},   // _CBA
+  { /* for YM */
     /*  A_l  A_r  B_l  B_r  C_l  C_r */
-  {100, 100, 100, 100, 100, 100},	// _MONO
-  {100, 5, 70, 70, 5, 100},	// _ABC
-  {100, 5, 5, 100, 70, 70},	// _ACB
-  {70, 70, 100, 5, 5, 100},	// _BAC
-  {5, 100, 100, 5, 70, 70},	// _BCA
-  {70, 70, 5, 100, 100, 5},	// _CAB
-  {5, 100, 70, 70, 100, 5}}      // _CBA
+    {100, 100, 100, 100, 100, 100},	// _MONO
+    {100, 5, 70, 70, 5, 100},	// _ABC
+    {100, 5, 5, 100, 70, 70},	// _ACB
+    {70, 70, 100, 5, 5, 100},	// _BAC
+    {5, 100, 100, 5, 70, 70},	// _BCA
+    {70, 70, 5, 100, 100, 5},	// _CAB
+    {5, 100, 70, 70, 100, 5}}   // _CBA
 };
 
+
+/* Make volume tables for work by current chip type and layout */
+static void GenVol (ayemu_ay_t *ay)
+{
+  int n, m;
+  int vol;
+	
+  for (n = 0; n < 32; n++) {
+    vol = (ay->ChipType == AYEMU_AY) ? ay->AYVol[n] : ay->YMVol[n];
+    for (m=0; m < 6; m++)
+      ay->vols[m][n] = (int) (((double) vol * ay->Layout[m]) / 100);
+  }
+}
 
 
 /* AY/YM Envelops calculated by GenEnv() */
 static int Envelope [16][128];
-
-/* Init envelops global table (may be the better do it statical data) */
-static void GenEnv ();
 static int bEnvGenInit = 0;
 
+/* make chip hardware envelop tables */
+static void GenEnv ()
+{
+  int env;
+  int pos;
+  int hold;
+  int dir;
+  int vol;
+	
+  for (env = 0; env < 16; env++) {
+    hold = 0;
+    dir = (env & 4)?  1 : -1;
+    vol = (env & 4)? -1 : 32;
+    for (pos = 0; pos < 128; pos++) {
+      if (!hold) {
+	vol += dir;
+	if (vol < 0 || vol >= 32) {
+	  if ( env & 8 ) {
+	    if ( env & 2 ) dir = -dir;
+	    vol = (dir > 0 )? 0:31;
+	    if ( env & 1 ) {
+	      hold = 1;
+	      vol = ( dir > 0 )? 31:0;
+	    }
+	  } else {
+	    vol = 0;
+	    hold = 1;
+	  }
+	}
+      }
+      Envelope[env][pos] = vol;
+    }
+  }
+  bEnvGenInit = 1;
+}
 
-/* TODO: deprecated, insert body to ayemu_start () */
 /* Set output sound format. 44100 Hz, 16-bit stereo is default */
 static int ayemu_set_sound_format (ayemu_ay_t *ay, int freq, int chans, int bits)
 {
-  if ((bits != 16 && bits != 8) || (chans != 2 && chans != 1))
+  if (   (bits != 16 && bits != 8) 
+	 || (chans != 2 && chans != 1)
+	 || (freq < 50))
     return 0;
-
   ay->sndfmt.freq = freq;
   ay->sndfmt.channels = chans;
   ay->sndfmt.bpc = bits;
-
   return 1;
 }
 
-/* Set chip and stereo type, chip frequence.
-  Pass (-1) as value means set to default. */
-void
-ayemu_set_chip (ayemu_ay_t *ay, ayemu_chip_t chip, int chipfreq, ayemu_stereo_t stereo)
+/** Set chip type, stereo layout and chip freq.
+ *
+ * You can pass AYEMU_SETCHIP_DEFAULT for default value.
+ */
+void ayemu_set_chip(ayemu_ay_t *ay, ayemu_chip_t chip, int chipfreq, ayemu_stereo_t stereo)
 {
   ay->ChipType = (chip != AYEMU_AY || chip != AYEMU_YM) ? AYEMU_AY : chip;
   ay->Stereo   = (stereo < 0 || stereo > 6) ? AYEMU_ABC : stereo;
@@ -108,11 +141,12 @@ ayemu_set_chip (ayemu_ay_t *ay, ayemu_chip_t chip, int chipfreq, ayemu_stereo_t 
   GenVol(ay);
 }
 
-  /* Set amplitude factor for each of channels (A,B anc C, tone and noise).
-Factor's value must be from (-100) to 100.
-If one or some values not in this interval, it accept to default. */
-void
-ayemu_set_EQ (ayemu_ay_t *ay, int A_l, int A_r, int B_l, int B_r, int C_l, int C_r)
+/** Set amplitude factor for each of channels (A,B anc C, tone and noise).
+ *
+ * Factor's value must be from (-100) to 100.
+ * If one or some values not in this interval, it accept to default.
+ */
+void ayemu_set_EQ(ayemu_ay_t *ay, int A_l, int A_r, int B_l, int B_r, int C_l, int C_r)
 {
   int def_Amp_A_l, def_Amp_A_r;
   int def_Amp_B_l, def_Amp_B_r;
@@ -139,44 +173,44 @@ ayemu_set_EQ (ayemu_ay_t *ay, int A_l, int A_r, int B_l, int B_r, int C_l, int C
   ay->bEQSet = 1;
 }
 
-  /* Load user's AY volumes table
-(it requere 16 16-bit values */
-void ayemu_set_AY_table (ayemu_ay_t *ay, uint16_t tbl[])
+/** Load user's AY volumes table
+ *
+ *  Loading user's AY volumes table requere 16 16-bit integer values 
+ */
+void ayemu_set_AY_table (ayemu_ay_t *ay, Uint16 tbl[16])
 {
   int n;
 
-  /* т.к. внутри программы для простоты обе таблицы по 32 элемента
-     для АУ приходится их дублировать */
-  for (n = 0; n < 16; n++)
-    {
-      ay->AYVol[n * 2 + 0] = tbl[n];
-      ay->AYVol[n * 2 + 1] = tbl[n];
-    }
-
+  for (n = 0; n < 16; n++) {
+    ay->AYVol[n * 2 + 0] = tbl[n];
+    ay->AYVol[n * 2 + 1] = tbl[n];
+  }
   ay->bAY_table = 1;
 }
 
-  /* Load user's YM volume table
-(it requered 32 16-bit values */
-void ayemu_set_YM_table (ayemu_ay_t *ay, uint16_t *tbl)
+/** Load user's YM volume table
+ * 
+ * (it requered 32 16-bit values)
+ */
+void ayemu_set_YM_table (ayemu_ay_t *ay, Uint16 tbl[32])
 {
   int n;
 
   for (n = 0; n < 32; n++)
     ay->YMVol[n] = tbl[n];
-
   ay->bYM_table = 1;
 }
 
-
-/* Reset AY, generate internal volume tables (by chip type, sound
-   format and amplitude factors).
-
-   NOTE: if you have call ayemu_set_EQ, ayemu_set_AY_table or
-   ayemu_set_YM_table, you need do it _before_ call this function to
-   apply changes. 
-  */
-int ayemu_start (ayemu_ay_t *ay, int freq, int chans, int bits)
+/** Initialize sound chip emulator
+ *
+ * Reset AY, generate internal volume tables (by chip type, sound
+ * format and amplitude factors).
+ *
+ *  NOTE: if you have call ayemu_set_EQ, ayemu_set_AY_table or
+ *  ayemu_set_YM_table, you need do it _before_ call this function to
+ *  apply changes. 
+ */
+int ayemu_start(ayemu_ay_t *ay, int freq, int chans, int bits)
 {
   int vol, max_l, max_r;
 
@@ -194,21 +228,12 @@ int ayemu_start (ayemu_ay_t *ay, int freq, int chans, int bits)
 
   /* If equlaizer is not init yet set defaults */
   //  if (! ay->bEQSet)
-    ayemu_set_EQ (ay, 255, 255, 255, 255, 255, 255);
+  ayemu_set_EQ (ay, 255, 255, 255, 255, 255, 255);
 
-  /* engine initialization */
-  ay->CntA = 0;
-  ay->CntB = 0;
-  ay->CntC = 0;
-  ay->CntN = 0;
-  ay->Cur_Seed = 0xFFFF;  /* noise generator */
-  ay->BitA = 0;  /* generator state bits */
-  ay->BitB = 0;
-  ay->BitC = 0;
-  ay->BitN = 0;
-  ay->EnvNum = 0; /* envelop init */
-  ay->CntE = 0;
-  ay->EnvPos = 0;
+  ay->Cur_Seed = 0xFFFF;  /* init value for noise generator */
+  ay->cnt_a = ay->cnt_b = ay->cnt_c = ay->cnt_n = ay->cnt_e = 0;
+  ay->bit_a = ay->bit_b = ay->bit_c = ay->bit_n = 0;
+  ay->env_pos = ay->EnvNum = 0;
 
   //  if (! ay->bAY_table)
   ayemu_set_AY_table (ay, Lion17_AY_table);
@@ -227,276 +252,149 @@ int ayemu_start (ayemu_ay_t *ay, int freq, int chans, int bits)
   max_l = ay->vols[0][31] + ay->vols[2][31] + ay->vols[3][31];
   max_r = ay->vols[1][31] + ay->vols[3][31] + ay->vols[5][31];
   vol = (max_l > max_r) ? max_l : max_r;  // =157283 on all defaults
-  ay->Amp_Global = ay->ChipTacts_per_outcount *vol / MAX_AMP;
+  ay->Amp_Global = ay->ChipTacts_per_outcount *vol / AYEMU_MAX_AMP;
 
   return 1;
 }
 
+#define WARN_IF_REGISTER_GREAT_THAN(r,m) \
+	if (*(regs + r) > m) \
+		fprintf(stderr, "ayemu_set_regs: warning: possible bad register data- R%d > %d\n", r, m)
 
-void ayemu_set_regs (ayemu_ay_t *ay, uint8_t *regs)
+/** Assign values for AY registers.
+ *
+ * You must pass array of char [14] to this function
+ */
+void ayemu_set_regs(ayemu_ay_t *ay, unsigned char *regs)
 {
-  ay->regs.tone_a  = regs[0];
-  ay->regs.tone_a += (regs[1] & 0x0f) << 8;
-  if (DEBUG && (regs[1] & 0xf0))
-    printf ("Warning: Possible invalid register data: R1 has some of bit 7-4.\n");
+  WARN_IF_REGISTER_GREAT_THAN(1,15);
+  WARN_IF_REGISTER_GREAT_THAN(3,15);
+  WARN_IF_REGISTER_GREAT_THAN(5,15);
+  WARN_IF_REGISTER_GREAT_THAN(8,31);
+  WARN_IF_REGISTER_GREAT_THAN(9,31);
+  WARN_IF_REGISTER_GREAT_THAN(10,31);
+  WARN_IF_REGISTER_GREAT_THAN(13,15);
 
-  ay->regs.tone_b  = regs[2];
-  ay->regs.tone_b += (regs[3] & 0x0f) << 8;
-  if (DEBUG && (regs[3] & 0xf0))
-    printf ("Warning: Possible invalid register data: R3 has some of bit 7-4.\n");
-
-  ay->regs.tone_c  = regs[4];
-  ay->regs.tone_c += (regs[5] & 0x0f) << 8;
-  if (DEBUG && (regs[5] & 0xf0))
-    printf ("Warning: Possible invalid register data: R5 has some of bit 7-4.\n");
+  ay->regs.tone_a  = regs[0] + (regs[1] & 0x0f) << 8;
+  ay->regs.tone_b  = regs[2] += (regs[3] & 0x0f) << 8;
+  ay->regs.tone_c  = regs[4] += (regs[5] & 0x0f) << 8;
 
   ay->regs.noise = regs[6] & 0x1f;
-  if (DEBUG && (regs[6] & 0xe0))
-    printf ("Warning: Possible invalid register data: R6 has some of bit 7-5.\n");
 
   ay->regs.R7_tone_a  = ! (regs[7] & 0x01);
   ay->regs.R7_tone_b  = ! (regs[7] & 0x02);
   ay->regs.R7_tone_c  = ! (regs[7] & 0x04);
+
   ay->regs.R7_noise_a = ! (regs[7] & 0x08);
   ay->regs.R7_noise_b = ! (regs[7] & 0x10);
   ay->regs.R7_noise_c = ! (regs[7] & 0x20);
 
-  /* set value to (-1) if use envelop */
   ay->regs.vol_a = regs[8]  & 0x0f;
   ay->regs.vol_b = regs[9]  & 0x0f;
   ay->regs.vol_c = regs[10] & 0x0f;
-
   ay->regs.env_a = regs[8]  & 0x10;
   ay->regs.env_b = regs[9]  & 0x10;
   ay->regs.env_c = regs[10] & 0x10;
+  ay->regs.env_freq = regs[11] += regs[12] << 8;
 
-  if (DEBUG && (regs[8] & 0xe0))
-    printf ("Warning: Possible invalid register data: R8 has some of bit 7-5.\n");
-  if (DEBUG && (regs[9] & 0xe0))
-    printf ("Warning: Possible invalid register data: R9 has some of bit 7-5.\n");
-  if (DEBUG && (regs[10] & 0xe0))
-    printf ("Warning: Possible invalid register data: R10 has some of bit 7-5.\n");
-
-  ay->regs.env_freq  = regs[11];
-  ay->regs.env_freq += regs[12] << 8;
-
-  if (regs[13] != 255)
-    {
-      ay->regs.env_style = regs[13] & 0x0f;
-      ay->EnvPos = 0;
-      ay->CntE = 0;
-    }
-  if (DEBUG && (regs[13] & 0xf0))
-    printf ("Warning: Possible invalid register data: R13 has some of bit 7-4.\n");
-
+  if (regs[13] != 0xff) {                   /* R13 = 255 means continue curent envelop */
+    ay->regs.env_style = regs[13] & 0x0f;
+    ay->env_pos = ay->cnt_e = 0;
+  }
 }
 
-
-/* Generate sound.
-   Fill sound buffer with current register data
-   Return value: pointer to next data in output sound buffer
-*/
-uint8_t *
-ayemu_gen_sound (ayemu_ay_t *ay, uint8_t *sound_buf, size_t sound_bufsize)
+/** Generate sound.
+ *
+ * Fill sound buffer with current register data
+ * Return value: pointer to next data in output sound buffer
+ */
+unsigned char *ayemu_gen_sound(ayemu_ay_t *ay, unsigned char *sound_buf, size_t sound_bufsize)
 {
   int mix_l, mix_r;
-  int vol_e; /* value from current envelop */
-  int vol;  			/* tmp result volume */
-  int n, m;
+  int tmpvol;
+  int m;
   int snd_numcount;
-
-  /* sound buffer size must be divide on 4 */
+	
   snd_numcount = sound_bufsize / (ay->sndfmt.channels * (ay->sndfmt.bpc >> 3));
+  while (snd_numcount-- > 0) {
+    mix_l = mix_r = 0;
+		
+    for (m = 0 ; m < ay->ChipTacts_per_outcount ; m++) {
+      if (++ay->cnt_a >= ay->regs.tone_a) {
+	ay->cnt_a = 0;
+	ay->bit_a = ! ay->bit_a;
+      }
+      if (++ay->cnt_b >= ay->regs.tone_b) {
+	ay->cnt_b = 0;
+	ay->bit_b = ! ay->bit_b;
+      }
+      if (++ay->cnt_c >= ay->regs.tone_c) {
+	ay->cnt_c = 0;
+	ay->bit_c = ! ay->bit_c;
+      }
+			
+      /* GenNoise (c) Hacker KAY & Sergey Bulba */
+      if (++ay->cnt_n >= (ay->regs.noise * 2)) {
+	ay->cnt_n = 0;
+	ay->Cur_Seed = (ay->Cur_Seed * 2 + 1) ^ \
+	  (((ay->Cur_Seed >> 16) ^ (ay->Cur_Seed >> 13)) & 1); 
+	ay->bit_n = ((ay->Cur_Seed >> 16) & 1);
+      }
+			
+      if (++ay->cnt_e >= ay->regs.env_freq) {
+	ay->cnt_e = 0;
+	if (++ay->env_pos > 127)
+	  ay->env_pos = 64;
+      }
 
-  for (n=0; n < snd_numcount; n++)
-    {
-      /* accumulate chip volumes for one sound tick */
-      mix_l = mix_r = 0;
-      
-      /* doing all chip tackts for one sound tick */
-      for (m = 0 ; m < ay->ChipTacts_per_outcount ; m++)
-	{
-	  /* increate channel counters */
-	  if (++ay->CntA >= ay->regs.tone_a) 
-	    {
-	      ay->CntA = 0;
-	      ay->BitA = ! ay->BitA;
-	    }
-	  if (++ay->CntB >= ay->regs.tone_b)
-	    {
-	      ay->CntB = 0;
-	      ay->BitB = ! ay->BitB;
-	    }
-	  if (++ay->CntC >= ay->regs.tone_c)
-	    {
-	      ay->CntC = 0;
-	      ay->BitC = ! ay->BitC;
-	    }
+#define ENVVOL Envelope [ay->regs.env_style][ay->env_pos]
 
-	  /* GenNoise (c) Hacker KAY & Sergey Bulba */
-	  if (++ay->CntN >= (ay->regs.noise * 2))
-	    {
-	      ay->CntN = 0;
-	      ay->Cur_Seed = (ay->Cur_Seed * 2 + 1) ^ \
-		(((ay->Cur_Seed >> 16) ^ (ay->Cur_Seed >> 13)) & 1); 
-	      ay->BitN = ((ay->Cur_Seed >> 16) & 1);
-	    }
-
-	  /* gen envelope */
-	  if (++ay->CntE >= ay->regs.env_freq)
-	    {
-	      ay->CntE = 0;
-	      if (++ay->EnvPos > 127)
-		ay->EnvPos = 64;
-	    }
-
-	  vol_e = Envelope [ay->regs.env_style] [ay->EnvPos];
-
-	  /* channel A */
-	  if ((ay->BitA | !ay->regs.R7_tone_a) & (ay->BitN | !ay->regs.R7_noise_a))
-	    {
-	      vol = (ay->regs.env_a)? vol_e : 
-		ay->regs.vol_a * 2 + 1;   /* 15 * 2 + 1 = 31 max */
-	      mix_l += ay->vols[0][vol];
-	      mix_r += ay->vols[1][vol];
-	    }
-
-	  /* channel B */
-	  if ((ay->BitB | !ay->regs.R7_tone_b) & (ay->BitN | !ay->regs.R7_noise_b))
-	    {
-	      vol =(ay->regs.env_b)? vol_e : 
-		ay->regs.vol_b * 2 + 1;
-	      mix_l += ay->vols[2][vol];
-	      mix_r += ay->vols[3][vol];
-	    }
-
-	  /* channel C */
-	  if ((ay->BitC | !ay->regs.R7_tone_c) & (ay->BitN | !ay->regs.R7_noise_c))
-	    {
-	      vol = (ay->regs.env_c)? vol_e : 
-		ay->regs.vol_c * 2 + 1;
-	      mix_l += ay->vols[4][vol];
-	      mix_r += ay->vols[5][vol];
-	    }
-
-	} /* end for (m=0; ...) */
-
-      mix_l /= ay->Amp_Global;
-      mix_r /= ay->Amp_Global;
-     
-      if (ay->sndfmt.bpc == 8)
-	{
-	  mix_l = (mix_l >> 8) | 128; /* 8 bit sound */
-	  mix_r = (mix_r >> 8) | 128;
-	  *sound_buf++ = mix_l;
-	  if (ay->Stereo != AYEMU_MONO)
-	    *sound_buf++ = mix_r;
-	}
-      else
-	{
-	  *sound_buf++ = mix_l & 0x00FF; /* 16 bit sound */
-	  *sound_buf++ = (mix_l >> 8);
-	  if (ay->Stereo != AYEMU_MONO) {
-	    *sound_buf++ = mix_r & 0x00FF;
-	    *sound_buf++ = (mix_r >> 8);
-	  }
-	}
+      if ((ay->bit_a | !ay->regs.R7_tone_a) & (ay->bit_n | !ay->regs.R7_noise_a)) {
+	tmpvol = (ay->regs.env_a)? ENVVOL : ay->regs.vol_a * 2 + 1;
+	mix_l += ay->vols[0][tmpvol];
+	mix_r += ay->vols[1][tmpvol];
+      }
+			
+      if ((ay->bit_b | !ay->regs.R7_tone_b) & (ay->bit_n | !ay->regs.R7_noise_b)) {
+	tmpvol =(ay->regs.env_b)? ENVVOL :  ay->regs.vol_b * 2 + 1;
+	mix_l += ay->vols[2][tmpvol];
+	mix_r += ay->vols[3][tmpvol];
+      }
+			
+      if ((ay->bit_c | !ay->regs.R7_tone_c) & (ay->bit_n | !ay->regs.R7_noise_c)) {
+	tmpvol = (ay->regs.env_c)? ENVVOL : ay->regs.vol_c * 2 + 1;
+	mix_l += ay->vols[4][tmpvol];
+	mix_r += ay->vols[5][tmpvol];
+      }			
+    } /* end for (m=0; ...) */
+		
+    mix_l /= ay->Amp_Global;
+    mix_r /= ay->Amp_Global;
+		
+    if (ay->sndfmt.bpc == 8) {
+      mix_l = (mix_l >> 8) | 128; /* 8 bit sound */
+      mix_r = (mix_r >> 8) | 128;
+      *sound_buf++ = mix_l;
+      if (ay->Stereo != AYEMU_MONO)
+	*sound_buf++ = mix_r;
+    } else {
+      *sound_buf++ = mix_l & 0x00FF; /* 16 bit sound */
+      *sound_buf++ = (mix_l >> 8);
+      if (ay->Stereo != AYEMU_MONO) {
+	*sound_buf++ = mix_r & 0x00FF;
+	*sound_buf++ = (mix_r >> 8);
+      }
     }
-  
+  }
   return sound_buf;
 }
 
-
-/* Make volume tables for work by current chip type and layout */
-static void
-GenVol (ayemu_ay_t *ay)
-{
-  int n, m;
-  int vol;
-
-  for (n = 0; n < 32; n++)
-    {
-      vol = (ay->ChipType == AYEMU_AY) ? ay->AYVol[n] : ay->YMVol[n];
-
-      for (m=0; m < 6; m++)
-	ay->vols[m][n] = (int) (((double) vol * ay->Layout[m]) / 100);
-    }
-}
-
-
-/* make chip hardware envelop tables */
-static void
-GenEnv ()
-{
-        int env, pos;
-        int Hold;
-        int Dir;
-        int Vol;
-
-
-	int n, m;
-
-        bEnvGenInit = 1;
-
-        // цикл по каждой огибающей
-        for( env = 0; env<16; env++)
-        {
-                Hold = 0; // выключаем заморозку
-                // Начинаем сверху или снизу? (бит 2)
-                Dir = (env & 4)?  1 : -1;
-                Vol = (env & 4)? -1 : 32;
-                // строим огибающую
-                for( pos=0; pos<128; pos++)
-                {
-                        // если не заморожено
-                        if( !Hold )
-                        {
-                                // то изменяем громкость в соответствие с направлением
-                                Vol += Dir;
-                                // если достигли верхнего или нижнего предела
-                                if ( Vol < 0 || Vol >= 32 )
-                                {
-                                        // если установлен бит 3 - продолжение
-                                        if ( env & 8 )
-                                        {
-                                                // то если установлен бит 2- чередование
-                                                // меняем направление
-                                                if ( env & 2 ) Dir = -Dir;
-                                                Vol = ( Dir > 0 ) ? 0:31;
-                                                // если установлен бит 0-задержка
-                                                // то замораживаем
-                                                if ( env & 1 )
-                                                {
-                                                        Hold = 1;
-                                                        Vol = ( Dir > 0 ) ? 31:0;
-                                                }
-                                        }
-                                        // иначе, если нет бита продолжения, то
-                                        // замораживаем и выключаем
-                                        else
-                                        {
-                                                Vol = 0;
-                                                Hold = 1;
-                                        }
-                                }
-                        }
-                        Envelope[env][pos] = Vol;
-                }
-        }
-
-	/*
-	for (n=0; n < 16 ; n++) {
-	  for (m=0; m < 128; m++)
-	    fprintf (stderr, "%3d ", Envelope[n][m]);
-	  fprintf (stderr, "\n");
-	}
-	*/
-}
-
-
-/* Free all data allocated by emulator */
+/** Free all data allocated by emulator
+ *
+ * For now it do nothing.
+ */
 void ayemu_free (ayemu_ay_t *ay)
 {
-  /* nothing to free */
+  /* nothing to do here */
   return;
 }
