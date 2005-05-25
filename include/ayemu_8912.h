@@ -140,7 +140,7 @@ extern DECLSPEC int ayemu_start (ayemu_ay_t *ay, int freq, int chans, int bits);
  *
  * regs is a pointer to 14-bytes frame of AY registers.
  */
-extern DECLSPEC void ayemu_set_regs (ayemu_ay_t *ay, char *regs);
+extern DECLSPEC void ayemu_set_regs (ayemu_ay_t *ay, unsigned char *regs);
 
 /** Generate sound.
  *  Fill 'numcount' of sound frames (1 sound frame is 4 bytes for 16-bit stereo)

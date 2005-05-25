@@ -23,7 +23,7 @@ static int read_word32(FILE *fp, int *p)
   *p = fgetc(fp);
   *p += (getc(fp) << 8);
   *p += (getc(fp) << 16);
-  *p += ((c = getc(fp)) << 42);
+  *p += ((c = getc(fp)) << 24);
   return (c == EOF)? 0 : 1;
 }
 
@@ -57,9 +57,9 @@ int ayemu_vtx_open (ayemu_vtx_t *vtx, const char *filename)
   buf[0] = tolower(buf[0]);
   buf[1] = tolower(buf[1]);
   if (strncmp(buf, "ay", 2) == 0)
-    vtx->hdr.chip = AYEMU_AY;
+    vtx->hdr.chiptype = AYEMU_AY;
   else if (strncmp (buf, "ym", 2) == 0)
-    vtx->hdr.chip = AYEMU_YM;
+    vtx->hdr.chiptype = AYEMU_YM;
   else {
     fprintf (stderr, "File %s is _not_ VORTEX format!\nIt not begins from AY or YM.\n", filename);
     fclose (vtx->fp);
@@ -203,7 +203,7 @@ void ayemu_vtx_sprintname (ayemu_vtx_t *vtx, char *buf, int bufsize, char *fmt)
 	APPEND(FMT_STRING, (vtx->hdr.loop)? "looped" : "non-looped" );
 	break;
       case 'c':
-	APPEND(FMT_STRING, (vtx->hdr.chip == AYEMU_AY)? "AY" : "YM" );
+	APPEND(FMT_STRING, (vtx->hdr.chiptype == AYEMU_AY)? "AY" : "YM" );
 	break;
       case 'F':
 	APPEND(FMT_NUM, vtx->hdr.chipFreq);
