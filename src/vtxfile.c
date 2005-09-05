@@ -152,6 +152,7 @@ int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, char *regs)
  * %y year
  * %f song from
  * %T Tracker
+ * %C Comment
  * %s stereo type (ABC, BCA, ...)
  * %l 'looped' or 'non-looped'
  * %c chip type: 'AY' or 'YM'
@@ -176,45 +177,48 @@ void ayemu_vtx_sprintname (ayemu_vtx_t *vtx, char *buf, int bufsize, char *fmt)
     fmt = "%a - %t";
   
   while (--bufsize > 0 && *fmt != '\0')
-    if (*fmt != '%')
-      *buf++ = *fmt++;
-    else {
-      char c = *++fmt;
-      switch(c) {
-      case 'a':
-        APPEND(FMT_STRING, vtx->hdr.author);
-        break;
-      case 't':
-        APPEND(FMT_STRING, vtx->hdr.title);
-	break;
-      case 'y':
-	APPEND(FMT_NUM, vtx->hdr.year);
-	break;
-      case 'f':
-	APPEND(FMT_STRING, vtx->hdr.from);
-	break;
-      case 'T':
-	APPEND(FMT_STRING, vtx->hdr.tracker);
-	break;
-      case 's':
-	APPEND(FMT_STRING, stereo_types[vtx->hdr.stereo]);
-	break;
-      case 'l':
-	APPEND(FMT_STRING, (vtx->hdr.loop)? "looped" : "non-looped" );
-	break;
-      case 'c':
-	APPEND(FMT_STRING, (vtx->hdr.chiptype == AYEMU_AY)? "AY" : "YM" );
-	break;
-      case 'F':
-	APPEND(FMT_NUM, vtx->hdr.chipFreq);
-	break;
-      case 'P':
-	APPEND(FMT_NUM, vtx->hdr.playerFreq);
-	break;
-      default:
-	*buf++ = c;
-      }
-    }
+	  if (*fmt != '%')
+		  *buf++ = *fmt++;
+	  else {
+		  char c = *++fmt;
+		  switch(c) {
+		  case 'a':
+			  APPEND(FMT_STRING, vtx->hdr.author);
+			  break;
+		  case 't':
+			  APPEND(FMT_STRING, vtx->hdr.title);
+			  break;
+		  case 'y':
+			  APPEND(FMT_NUM, vtx->hdr.year);
+			  break;
+		  case 'f':
+			  APPEND(FMT_STRING, vtx->hdr.from);
+			  break;
+		  case 'T':
+			  APPEND(FMT_STRING, vtx->hdr.tracker);
+			  break;
+		  case 'C':
+			  APPEND(FMT_STRING, vtx->hdr.comment);
+			  break;
+		  case 's':
+			  APPEND(FMT_STRING, stereo_types[vtx->hdr.stereo]);
+			  break;
+		  case 'l':
+			  APPEND(FMT_STRING, (vtx->hdr.loop)? "looped" : "non-looped" );
+			  break;
+		  case 'c':
+			  APPEND(FMT_STRING, (vtx->hdr.chiptype == AYEMU_AY)? "AY" : "YM" );
+			  break;
+		  case 'F':
+			  APPEND(FMT_NUM, vtx->hdr.chipFreq);
+			  break;
+		  case 'P':
+			  APPEND(FMT_NUM, vtx->hdr.playerFreq);
+			  break;
+		  default:
+			  *buf++ = c;
+		  }
+	  }
 }
 
 /** Free all of allocaded resource for this file.

@@ -60,18 +60,15 @@
 # endif
 #endif
 
+#define EXTERN extern DECLSPEC
+
+/* typedefs for 32-bit architecture */
 typedef unsigned char	Uint8;
-typedef signed char		Sint8;
+typedef signed char	Sint8;
 typedef unsigned short	Uint16;
 typedef signed short	Sint16;
 typedef unsigned int	Uint32;
-typedef signed int		Sint32;
-
-/** Sound chip type */
-typedef enum {
-  AYEMU_AY,
-  AYEMU_YM
-} ayemu_chip_t;
+typedef signed int	Sint32;
 
 /* include other library headers */
 #include "ayemu_8912.h"
