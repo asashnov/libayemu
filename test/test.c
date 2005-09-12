@@ -13,18 +13,19 @@
 #include "ayemu.h"
 
 struct option options[] = {
-  { "chip",    no_argument, NULL, 'c'},
-  { "test",    no_argument, NULL, 't'},
-  { "seconds", no_argument, NULL, 's'},
+  { "chip",    required_argument, NULL, 'c'},
+  { "test",    required_argument, NULL, 't'},
+  { "seconds", required_argument, NULL, 's'},
   { "usage",   no_argument, NULL, 'u'},
   { "help",    no_argument, NULL, 'h'},
   { 0, 0, 0, 0}
 };
+char short_args[] = "+yt:s:uh";
 
 #define DEVICE_NAME "/dev/dsp"
 
 ayemu_ay_t ay;
-uint8_t * audio_buf;
+char * audio_buf;
 size_t audio_bufsize;
 int audio_fd; /* OSS device file descriptor */
 int freq, chans, bits;
@@ -32,7 +33,7 @@ int n;
 
 int chip = AYEMU_AY;  // chip (0=ay, 1=ym)
 int test = 0;  // test number
-int seconds = 1; 		/* number of seconds for each test */
+int seconds = 5; 		/* number of seconds for each test */
 
 void usage ()
 {
@@ -62,50 +63,67 @@ void Test();
 void gen_sound (tonea, toneb, tonec, noise, control, vola, volb, volc, envfreq, envstyle)
 {
   int n, len;
-  uint8_t regs[14];
+  unsigned char regs[14];
 
+  /* setup regs */
   regs[0] = tonea & 0xff;
   regs[1] = tonea >> 8;
-
   regs[2] = toneb & 0xff;
   regs[3] = toneb >> 8;
-
   regs[4] = tonec & 0xff;
   regs[5] = tonec >> 8;
-
   regs[6] = noise;
   regs[7] = (~control) & 0x3f; 	/* invert bits 0-5 */
-
   regs[8] = vola; 		/* included bit 4 */
   regs[9] = volb;
   regs[10] = volc;
-
   regs[11] = envfreq & 0xff;
   regs[12] = envfreq >> 8;
-
   regs[13] = envstyle;
 
+  /* test setreg function: set from array and dump internal regs data */
   ayemu_set_regs(&ay, regs);
+  printf ("\tRegs: A=%d B=%d C=%d N=%02d R7=[%d%d%d%d%d%d] "
+	  "vols: A=%d B=%d C=%d EnvFreq=%d style %d\n",
+	  ay.regs.tone_a, ay.regs.tone_b, ay.regs.tone_c, ay.regs.noise, 
+	  ay.regs.R7_tone_a, ay.regs.R7_tone_b, ay.regs.R7_tone_c, 
+	  ay.regs.R7_noise_a, ay.regs.R7_noise_b, ay.regs.R7_noise_c,
+	  ay.regs.vol_a, ay.regs.vol_b, ay.regs.vol_c,
+	  ay.regs.env_freq, ay.regs.env_style);
 
-  printf ("\tRegs: A=%d B=%d C=%d N=%02d\tR7=[%d%d%d%d%d%d]"
-	  "\tvols: A=%d B=%d C=%d, EnvFreq=%d style %d\n",
-	  ay.reg_tone_a, ay.reg_tone_b, ay.reg_tone_c, ay.reg_noise, 
-	  ay.reg_R7_tone_a, ay.reg_R7_tone_b, ay.reg_R7_tone_c, 
-	  ay.reg_R7_noise_a, ay.reg_R7_noise_b, ay.reg_R7_noise_c,
-	  ay.reg_vol_a, ay.reg_vol_b, ay.reg_vol_c,
-	  ay.reg_env_freq, ay.reg_env_style);
-
-  for (n=0; n < seconds; n++)
-    {
-      ayemu_gen_sound (&ay, audio_buf, audio_bufsize);
-
-      /* play sound buffer */
-      if (write(audio_fd, audio_buf, audio_bufsize) == -1) {
-	fprintf (stderr, "Error writting to sound device, break.\n");
-	break;
-      }
+  /* generate sound */
+  for (n=0; n < seconds; n++) {
+    ayemu_gen_sound (&ay, audio_buf, audio_bufsize);
+    if (write(audio_fd, audio_buf, audio_bufsize) == -1) {
+      fprintf (stderr, "Error writting to sound device, break.\n");
+      break;
     }
+  }
 }
+
+void init_oss()
+{
+  if ((audio_fd = open(DEVICE_NAME, O_WRONLY, 0)) == -1) {
+    fprintf (stderr, "Can't open /dev/dsp\n");
+  }
+  else if (ioctl(audio_fd, SNDCTL_DSP_SETFMT, &bits) == -1) {
+    fprintf (stderr, "Can't set sound format\n");
+  }
+  else if (ioctl(audio_fd, SNDCTL_DSP_CHANNELS, &chans) == -1) {
+    fprintf (stderr, "Can't set number of channels\n");
+  }
+  else if (ioctl(audio_fd, SNDCTL_DSP_SPEED, &freq) == -1) {
+    fprintf (stderr, "Can't set audio freq\n");
+  }
+  else
+    return;
+
+  fprintf(stderr, "OSS initialization failed\n");
+  exit(1);
+}
+
+
+
 
 int main (int argc, char **argv)
 {
@@ -115,7 +133,7 @@ int main (int argc, char **argv)
   
   opterr = 0;
   
-  while ((c = getopt_long (argc, argv, "+yt:s:uh", options, &option_index)) != -1)
+  while ((c = getopt_long (argc, argv, short_args, options, &option_index)) != -1)
     switch (c)
       {
       case 'y':
@@ -154,46 +172,25 @@ int main (int argc, char **argv)
   chans = 2;  /* 1=mono, 2=stereo */
   bits = 16;  /* 16 or 8 bit */
 
-    /* =====----- OSS Init sound system ------======= */
- if ((audio_fd = open(DEVICE_NAME, O_WRONLY, 0)) == -1) {
-    fprintf (stderr, "Can't open /dev/dsp\n");
-  }
-  else if (ioctl(audio_fd, SNDCTL_DSP_SETFMT, &bits) == -1) {
-    fprintf (stderr, "Can't set sound format\n");
-  }
-  else if (ioctl(audio_fd, SNDCTL_DSP_CHANNELS, &chans) == -1) {
-    fprintf (stderr, "Can't set number of channels\n");
-  }
-  else if (ioctl(audio_fd, SNDCTL_DSP_SPEED, &freq) == -1) {
-    fprintf (stderr, "Can't set audio freq\n");
-  }
-  else {
+  init_oss(&freq, &chans, &bits);
+  printf ("OSS sound system initialization success: bits=%d, chans=%d, freq=%d\n",
+	  bits, chans, freq);
 
-    printf ("OSS sound system initialization success: bits=%d, chans=%d, freq=%d\n", bits, chans, freq);
+  /* Allocate audio buffer for one AY frame */
+  audio_bufsize = freq * chans * (bits >> 3);
+  if ((audio_buf = (char*) malloc (audio_bufsize)) == NULL) {
+    fprintf (stderr, "Can't allocate sound buffer\n");
+    goto free_audio;
+  }
 
-    /* Allocate audio buffer for one AY frame */
-    audio_bufsize = freq * chans * (bits >> 3);
-    if ((audio_buf = (uint8_t *) malloc (audio_bufsize)) == NULL) {
-      fprintf (stderr, "Can't allocate sound buffer\n");
-      goto free_audio;
-    }
+  ayemu_init(&ay);
 
-    ayemu_start (&ay, freq, chans, bits);
+  Test();
     
-    printf ("ayemu_start (freq %d, chans %d, bits %d)\n",freq,chans,bits);
-
-    Test();
-    
-  free_audio:
-    close (audio_fd);
-  free_ay:   
-    ayemu_free(&ay); 
-  }
-     
+ free_audio:
+  close (audio_fd);
   return 0;
 }
-
-
 
 struct test_t {
   char *name;
@@ -281,14 +278,12 @@ testcases [] = {
   {"Channel A: tone 400, volume = 15, envelop 15 freq 4000", 
    400, 0, 0, 0, TONE_A, 15 | 0x10, 0, 0, 4000, 15},
 
-
-
   {NULL, 0,0,0,0,0,0,0,0,0,0}
 };
 
 
 void Test()
-{
+{ 
   if ((test * sizeof(struct test_t)) >= sizeof (testcases)) {
     printf ("Incorrect test number - %d\n", test);
     exit (1);
@@ -297,11 +292,13 @@ void Test()
   while (testcases[test].name != NULL)
     {
       printf ("Test %d: %s\n", test, testcases[test].name);
-      gen_sound (testcases[test].tonea, testcases[test].toneb, testcases[test].tonec, testcases[test].noise,
-		 testcases[test].control, testcases[test].vola, testcases[test].volb, testcases[test].volc,
+      gen_sound (testcases[test].tonea, testcases[test].toneb, 
+		 testcases[test].tonec, testcases[test].noise,
+		 testcases[test].control, testcases[test].vola,
+		 testcases[test].volb, testcases[test].volc,
 		 testcases[test].envfreq, testcases[test].envstyle);
       test++;
     }
-
+  
   printf ("Exit from Test()\n");
 }
