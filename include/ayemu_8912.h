@@ -78,6 +78,7 @@ typedef struct
   ayemu_sndfmt_t sndfmt;	/* output sound format */
 
   /* flags */
+  int magic;			/* structure init (init()) flag */
   int default_chip_flag;
   int default_stereo_flag;
   int default_sound_format_flag;
@@ -121,7 +122,6 @@ ayemu_set_regs (ayemu_ay_t *ay, unsigned char *regs);
 
 EXTERN void*
 ayemu_gen_sound (ayemu_ay_t *ay, void *buf, size_t bufsize);
-
 
 END_C_DECLS
 #endif
