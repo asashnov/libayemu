@@ -6,6 +6,8 @@ char *ayemu_err;
 
 static const char VERSION[] = "libayemu 0.9";
 
+const int MAGIC1 = 0xcdef;	/* for check ayemu_t structure inited */
+
 enum {
 /** Max amplitude value for stereo signal for avoiding for possible
     folowwing SSRC for clipping */
@@ -13,7 +15,7 @@ enum {
   AYEMU_DEFAULT_CHIP_FREQ = 1773400
 };
 
-/** sound chip volume envelops (will calculated by GenEnv()) */
+/** sound chip volume envelops (will calculated by gen_env()) */
 static int bEnvGenInit = 0;
 static int Envelope [16][128];
 
@@ -67,6 +69,15 @@ static const int default_layout [2][7][6] = {
 };
 
 
+static int check_magic(ayemu_ay_t *ay)
+{
+  if (ay->magic == MAGIC1)
+    return 1;
+  fprintf(stderr, "libayemu: passed pointer %p to uninitialized ayemu_ay_t structure\n", ay);
+  return 0;
+}
+
+
 /** make chip hardware envelop tables.
     Will execute once before first use. */
 static void gen_env()
@@ -113,6 +124,7 @@ void ayemu_init(ayemu_ay_t *ay)
   ay->default_stereo_flag = 1;
   ay->default_sound_format_flag = 1;
   ay->dirty = 1;
+  ay->magic = MAGIC1;
 
   ayemu_reset(ay);
 }
@@ -120,6 +132,8 @@ void ayemu_init(ayemu_ay_t *ay)
 
 void ayemu_reset(ayemu_ay_t *ay)
 {
+  if (!check_magic(ay)) return;
+
   ay->cnt_a = ay->cnt_b = ay->cnt_c = ay->cnt_n = ay->cnt_e = 0;
   ay->bit_a = ay->bit_b = ay->bit_c = ay->bit_n = 0;
   ay->env_pos = ay->EnvNum = 0;
@@ -147,6 +161,8 @@ static void set_table_ym (ayemu_ay_t *ay, int tbl[32])
 /** Set chip type. */
 int ayemu_set_chip_type(ayemu_ay_t *ay, ayemu_chip_t type, int *custom_table)
 {
+  if (!check_magic(ay)) return;
+
   if (!(type == AYEMU_AY_CUSTOM || type == AYEMU_YM_CUSTOM) && custom_table != NULL) {
     ayemu_err = "For non-custom chip type 'custom_table' param must be NULL";
     return 0;
@@ -187,6 +203,8 @@ int ayemu_set_chip_type(ayemu_ay_t *ay, ayemu_chip_t type, int *custom_table)
 /** Set chip frequency */
 void ayemu_set_chip_freq(ayemu_ay_t *ay, int chipfreq)
 {
+  if (!check_magic(ay)) return;
+
   ay->ChipFreq = chipfreq;
   ay->dirty = 1;
 }
@@ -194,11 +212,13 @@ void ayemu_set_chip_freq(ayemu_ay_t *ay, int chipfreq)
 /** Set output sound format */
 int ayemu_set_sound_format (ayemu_ay_t *ay, int freq, int chans, int bits)
 {
+  if (!check_magic(ay)) return;
+
   if (!(bits == 16 || bits == 8)) {
     ayemu_err = "Incorrect bits value";
     return 0;
   }
-  else if (!(chans == 1 && chans == 2)) {
+  else if (!(chans == 1 || chans == 2)) {
     ayemu_err = "Incorrect number of channels";
     return 0;
   }
@@ -226,6 +246,8 @@ int ayemu_set_stereo(ayemu_ay_t *ay, ayemu_stereo_t stereo_type, int *custom_eq)
 {
   int i;
   int chip;
+
+  if (!check_magic(ay)) return;
 
   if (stereo_type != AYEMU_STEREO_CUSTOM && custom_eq != NULL) {
     ayemu_err = "Stereo type not custom, 'custom_eq' parametr must be NULL";
@@ -271,6 +293,8 @@ if (*(regs + r) > m) \
  */
 void ayemu_set_regs(ayemu_ay_t *ay, unsigned char *regs)
 {
+  if (!check_magic(ay)) return;
+
   WARN_IF_REGISTER_GREAT_THAN(1,15);
   WARN_IF_REGISTER_GREAT_THAN(3,15);
   WARN_IF_REGISTER_GREAT_THAN(5,15);
@@ -278,9 +302,9 @@ void ayemu_set_regs(ayemu_ay_t *ay, unsigned char *regs)
   WARN_IF_REGISTER_GREAT_THAN(9,31);
   WARN_IF_REGISTER_GREAT_THAN(10,31);
 
-  ay->regs.tone_a  = regs[0] + (regs[1] & 0x0f) << 8;
-  ay->regs.tone_b  = regs[2] += (regs[3] & 0x0f) << 8;
-  ay->regs.tone_c  = regs[4] += (regs[5] & 0x0f) << 8;
+  ay->regs.tone_a  = regs[0] + ((regs[1]&0x0f) << 8);
+  ay->regs.tone_b  = regs[2] + ((regs[3]&0x0f) << 8);
+  ay->regs.tone_c  = regs[4] + ((regs[5]&0x0f) << 8);
 
   ay->regs.noise = regs[6] & 0x1f;
 
@@ -298,9 +322,7 @@ void ayemu_set_regs(ayemu_ay_t *ay, unsigned char *regs)
   ay->regs.env_a = regs[8]  & 0x10;
   ay->regs.env_b = regs[9]  & 0x10;
   ay->regs.env_c = regs[10] & 0x10;
-  //  ay->regs.env_freq = regs[11] += regs[12] << 8;
-  ay->regs.env_freq  = regs[11];
-  ay->regs.env_freq += regs[12] << 8;
+  ay->regs.env_freq = regs[11] + (regs[12] << 8);
 
   if (regs[13] != 0xff) {                   /* R13 = 255 means continue curent envelop */
     ay->regs.env_style = regs[13] & 0x0f;
@@ -315,7 +337,7 @@ static void prepare_generation(ayemu_ay_t *ay)
 
   if (!ay->dirty) return;
 
-  if (!bEnvGenInit) GenEnv ();
+  if (!bEnvGenInit) gen_env ();
 
   if (ay->default_chip_flag) ayemu_set_chip_type(ay, AYEMU_AY, NULL);
 
@@ -361,6 +383,7 @@ void *ayemu_gen_sound(ayemu_ay_t *ay, void *buff, size_t sound_bufsize)
   int snd_numcount;
   unsigned char *sound_buf = buff;
 
+  if (!check_magic(ay)) return;
 
   prepare_generation(ay);
 
