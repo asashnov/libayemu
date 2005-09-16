@@ -1,8 +1,7 @@
 Roman Scherbakov <v_soft@microfor.ru>
-
-The autor of VTX format and original winamp plugin
-
+  * The autor of VTX format and original plugin for winamp
+  * help to debug C code of libayemu
 
 Sashnov Alexander <sashnov@ngs.ru>
-
-Rewrite in_vtx plugin in C for xmms, fork it as independent GNU library
+  * Rewrite in_vtx plugin in C for xmms
+  * start libayemu project under GNU
