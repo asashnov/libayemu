@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT(src/ay8912.c)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(libayemu, 0.9.0)
+AM_INIT_AUTOMAKE(libayemu, 0.9.5)
 
 # Checks for programs.
 AC_PROG_CC
