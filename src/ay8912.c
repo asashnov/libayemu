@@ -1,3 +1,5 @@
+/* AY/YM emulator implementation. */
+
 #include "ayemu.h"
 
 #define debuglog stderr;
@@ -9,35 +11,35 @@ static const char VERSION[] = "libayemu 0.9";
 const int MAGIC1 = 0xcdef;	/* for check ayemu_t structure inited */
 
 enum {
-/** Max amplitude value for stereo signal for avoiding for possible
+/* Max amplitude value for stereo signal for avoiding for possible
     folowwing SSRC for clipping */
   AYEMU_MAX_AMP = 24575,
   AYEMU_DEFAULT_CHIP_FREQ = 1773400
 };
 
-/** sound chip volume envelops (will calculated by gen_env()) */
+/* sound chip volume envelops (will calculated by gen_env()) */
 static int bEnvGenInit = 0;
 static int Envelope [16][128];
 
 
-/** AY volume table (c) by V_Soft and Lion 17 */
+/* AY volume table (c) by V_Soft and Lion 17 */
 static int Lion17_AY_table [16] =
   { 0, 513, 828, 1239, 1923, 3238, 4926, 9110,
     10344, 17876, 24682, 30442, 38844, 47270, 56402, 65535};
 
-/** YM volume table (c) by V_Soft and Lion 17 */
+/* YM volume table (c) by V_Soft and Lion 17 */
 static int Lion17_YM_table [32] =
   { 0, 0, 190, 286, 375, 470, 560, 664,
     866, 1130, 1515, 1803, 2253, 2848, 3351, 3862,
     4844, 6058, 7290, 8559, 10474, 12878, 15297, 17787,
     21500, 26172, 30866, 35676, 42664, 50986, 58842, 65535};
 
-/** AY volume table (c) by Hacker KAY */
+/* AY volume table (c) by Hacker KAY */
 static int KAY_AY_table [16] =
   { 0, 836, 1212, 1773, 2619, 3875, 5397, 8823,
     10392, 16706, 23339, 29292, 36969, 46421, 55195, 65535};
 
-/** YM volume table (c) by Hacker KAY */
+/* YM volume table (c) by Hacker KAY */
 static int KAY_YM_table [32] =
   { 0, 0, 248, 450, 670, 826, 1010, 1239,
     1552, 1919, 2314, 2626, 3131, 3778, 4407, 5031,
@@ -78,7 +80,7 @@ static int check_magic(ayemu_ay_t *ay)
 }
 
 
-/** make chip hardware envelop tables.
+/* make chip hardware envelop tables.
     Will execute once before first use. */
 static void gen_env()
 {
@@ -116,7 +118,11 @@ static void gen_env()
 }
 
 
-
+/**
+   
+ * \retval ayemu_init none.
+ *
+*/
 void ayemu_init(ayemu_ay_t *ay)
 {
   ay->default_chip_flag = 1;
@@ -129,7 +135,11 @@ void ayemu_init(ayemu_ay_t *ay)
   ayemu_reset(ay);
 }
 
-
+/** Reset AY/YM chip.
+ *
+ * \arg \c ay - pointer to ayemu_ay_t structure.
+ * \return none.
+ */
 void ayemu_reset(ayemu_ay_t *ay)
 {
   if (!check_magic(ay)) return;
@@ -200,7 +210,7 @@ int ayemu_set_chip_type(ayemu_ay_t *ay, ayemu_chip_t type, int *custom_table)
 }
 
 
-/** Set chip frequency */
+/** Set chip frequency. */
 void ayemu_set_chip_freq(ayemu_ay_t *ay, int chipfreq)
 {
   if (!check_magic(ay)) return;
