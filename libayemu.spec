@@ -1,5 +1,5 @@
 %define name libayemu
-%define version 0.9.0
+%define version 0.9.5
 %define release 1
 
 Name:    %{name}
@@ -16,10 +16,22 @@ BuildRoot: %{_tmppath}/%{name}-root
 Requires: /sbin/ldconfig
 
 %description
-AY/YM sound chip (from ZX-Spectrum) emulation library.
+AY/YM sound chip (ZX spectrum 128 and others) emulation library.
 
 Install libayemu if you want play AY/YM music and sound effect in
 console player, xmms plugin or your own games/demos.
+
+%package devel
+Summary: AY/YM emulation library headers and static libs
+Group:          Development/Libraries
+
+%description devel
+This package contains all of the
+headers and the static libraries for
+libayemu.
+
+You'll only need this package if you
+are doing development.
 
 %prep
 %setup
@@ -35,17 +47,26 @@ rm -rf %{buildroot}
 %clean
 rm -rf %{buildroot}
 
-%post -p /sbin/ldconfig
+%post
+ldconfig
 
-%postun -p /sbin/ldconfig
+%postun
+ldconfig
 
 %files
 %defattr(-,root,root)
 %doc README TODO COPYING ChangeLog
+/%{_libdir}/libayemu.so*
+
+%files devel
 /usr/include/ayemu*
-/%{_libdir}/libayemu.*
+/%{_libdir}/libayemu.a*
 
 %changelog
+* Wed Sep 21 2005 Alexander Sashnov <sashnov@ngs.ru>
+  - split package to two: libayemu and libayemu-devel
 * Thu Feb 10 2005 Alexander Sashnov <sashnov@ngs.ru>
   - Start rpm spec written
-# date +"%a %b %d %Y"
+
+# LANG=C date +"%a %b %d %Y"
+
