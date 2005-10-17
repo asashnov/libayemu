@@ -16,7 +16,7 @@ BuildRoot: %{_tmppath}/%{name}-root
 Requires: /sbin/ldconfig
 
 %description
-AY/YM sound chip (ZX spectrum 128 and others) emulation library.
+AY/YM sound chip emulation library.
 
 Install libayemu if you want play AY/YM music and sound effect in
 console player, xmms plugin or your own games/demos.
@@ -69,4 +69,3 @@ ldconfig
   - Start rpm spec written
 
 # LANG=C date +"%a %b %d %Y"
-
