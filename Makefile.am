@@ -1,5 +1,5 @@
 ## Any directories that you want built and installed should go here.
-SUBDIRS                 = src test include
+SUBDIRS = src include
 
 ## Any directories you want a part of the distribution should be listed
 ## here, as well as have a Makefile generated at the end of configure.in
@@ -8,7 +8,7 @@ SUBDIRS                 = src test include
 DIST_SUBDIRS = $(SUBDIRS)
 
 # All the rest of the distributed files
-EXTRA_DIST = libayemu.spec Doxyfile bootstrap
+EXTRA_DIST = libayemu.spec Doxyfile bootstrap RELEASENOTES
 
 # Rule to build tar-gzipped distribution package
 $(PACKAGE)-$(VERSION).tar.gz: dist
