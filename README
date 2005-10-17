@@ -1,67 +1,83 @@
-	AY/YM emulation library.
+	AY/YM sound co-processor emulation library.
 
   This is the AY/YM sound chip emulator. These chips was used in such
-computers as Sinclair ZX Spectrum, Atari and some others. This library
-allow to use AY/YM sound effects and music in your own programms
-(games, demos and other). Library have also build-in function for
-handle .vtx files (lha5 compressed dump of AY register data frames)
-for playing music. 
+computers as Sinclair ZX Spectrum 128Kb(AY8912), Atari and some others.
+
+  This library allow to use AY/YM sound effects and music in your own
+programms, games, demos, etc. User must pass to library array of AY/YM
+registers (14-bytes) and library will generate sound stream by this.
+Library have functions for handle .vtx files (see below), doxygen
+format documentation and samples of use the library API.
+
+  VTX format is made for store AY/YM song in lha5 complession. This
+library can read sond info header and unpack lha5 compressed data from
+vtx file. There are thousands songs from games, magazins, demos
+available from other sources in internet. You can see
+http://vtx.microfor.ru/music.htm for example.
+
+See also playvtx (vtx console player) and xmms-vtx (vtx xmms plugin).
+
 
 
 
     Installation.
 
-For configure, make and install just do following commands:
+For configure, make and install just do the following commands:
 	
-	tar xzf libayemu-0.9.tgz
+	tar xzf libayemu-*.tgz
 	cd libayemu
 	./configure
 	make
-	make install	# under 'root'
+	make install
 
-It will install dinamic library and headers in system repository.
-See 'playvtx' for example of usage this library or just for playing files.
-
-
-
-    Get music in VTX format
-
-Largest music collection in VTX format can be found at 
-
-    http://vtx.microfor.ru/music.htm
-
-Also on vtx.microfor.ru you can found vtx player for winamp (as plugin) and pocketPC.
-
-ATTENTION: There is large zip archive on vtx.microfor.ru:
-
-vtx_songs   23.65 Mb  ZX Spectrum Vortex Music SFX Archive v1.5
-
-Inside this zip is the windows executable self-extracting archive. So if you have problem
-with run it (you use other than Windows (TM) operating system or you not want run not trusted
-executable from Internet) you can download it as plain zip archive by link:
-
-http://sashnov.fanstvo.com/vtx_songs.zip  (27 Mb)
+(last command requires the root privelegies).
+It will install library and headers in /usr/local/lib and /usr/local/include.
+See file INSTALL for read more about standard configure script options. 
 
 
 
-    Use library in your own programms/games/demos
 
-You can find examplpe of usage library for playing AY/YM sound effect in test/test.c
-Also see playvtx for playing music example.
+    Install latest version from CVS.
+
+You can download and install laters (under development) version of
+libayemu directly from CVS repository on sourceforge.net by following
+commands (this example for Linux/cygwin users):
+
+	cvs -d:pserver:anonymous@cvs.sf.net:/cvsroot/libayemu co libayemu
+	cd libayemu
+	sh bootstrap      # (for generate build script)
+	./configure
+	make
+	make install      # (with root privelegies)
+
+
+
+
+    Using the library
+
+You can find several usage examplpes for this library:
+  * console VTX-file player: playvtx;
+  * custom register data set: test.c in src dir.
+
+Also there is a good doxygen format documentation available.
 
 Other examples (under SDL, win32) coming soon (volunteers?).
 
 
 
-    Install latest version from CVS:
 
-You can download and install laters (in develop) version of libayemu directly from CVS
-by followin commands (this example for Linux users):
+    Other resources
 
-$ cvs -d:pserver:anonymous@cvs.sf.net:/cvsroot/libayemu co libayemu
-$ cd libayemu
-$ sh bootstrap      # for generate build scripts
-$ ./configure
-$ make
+On vtx.microfor.ru you can found vtx player for winamp (as plugin) and
+pocketPC.
 
-# make install   # this is as 'root'
+Warning: There is the large zip archive on vtx.microfor.ru:
+
+vtx_songs   23.65 Mb  ZX Spectrum Vortex Music SFX Archive v1.5
+
+But inside this zip the windows-executable self-extracting archive.
+So if you have problem with run it (if you use other than Windows (TM)
+operating system or you not want run not trusted executable from
+Internet) you can download it as plain zip archive by following link:
+
+http://sashnov.fanstvo.com/vtx_songs.zip  (27 Mb)
