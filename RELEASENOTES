@@ -1,0 +1,13 @@
+    Release notes for libayemu-0.9.5
+
+  The are many major changes from last 0.9 release:
+
+    * library API changed for more intuitive.
+    * library API documented with doxygen;
+
+  Now user not warry about aplly his setting to playing stream. There
+are six internal flags added for track actuality of settings so
+ayemu_start() function is no longer needed.
+
+  Doxygen documentation will help fast to understand library
+interface.
