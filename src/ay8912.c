@@ -59,7 +59,7 @@ static const int default_layout [2][7][6] = {
     {33, 100, 100, 33, 70, 70},	   // _BCA
     {70, 70, 33, 100, 100, 33},	   // _CAB
     {33, 100, 70, 70, 100, 33}},   // _CBA
-  { 
+  {
     /* for YM */
     {100, 100, 100, 100, 100, 100},	// _MONO
     {100, 5, 70, 70, 5, 100},	// _ABC
@@ -119,7 +119,6 @@ static void gen_env()
 
 
 /**
-   
  * \retval ayemu_init none.
  *
 */
@@ -171,7 +170,8 @@ static void set_table_ym (ayemu_ay_t *ay, int tbl[32])
 /** Set chip type. */
 int ayemu_set_chip_type(ayemu_ay_t *ay, ayemu_chip_t type, int *custom_table)
 {
-  if (!check_magic(ay)) return;
+if (!check_magic(ay))
+		return 0;
 
   if (!(type == AYEMU_AY_CUSTOM || type == AYEMU_YM_CUSTOM) && custom_table != NULL) {
     ayemu_err = "For non-custom chip type 'custom_table' param must be NULL";
@@ -219,10 +219,17 @@ void ayemu_set_chip_freq(ayemu_ay_t *ay, int chipfreq)
   ay->dirty = 1;
 }
 
-/** Set output sound format */
+/*! Set output sound format
+ * \arg \c ay - pointer to ayemu_t structure
+ * \arg \c freq - sound freq (44100 for example)
+ * \arg \c chans - number of channels (1-mono, 2-stereo)
+ * \arg \c bits - now supported only 16 and 8.
+ * \retval \b 1 on success, \b 0 if error occure
+ */
 int ayemu_set_sound_format (ayemu_ay_t *ay, int freq, int chans, int bits)
 {
-  if (!check_magic(ay)) return;
+  if (!check_magic(ay))
+    return 0;
 
   if (!(bits == 16 || bits == 8)) {
     ayemu_err = "Incorrect bits value";
@@ -248,16 +255,20 @@ int ayemu_set_sound_format (ayemu_ay_t *ay, int freq, int chans, int bits)
 }
 
 
-/** Set amplitude factor for each of channels (A,B anc C, tone and noise).
- *
+/*! Set amplitude factor for each of channels (A,B anc C, tone and noise).
  * Factor's value must be from (-100) to 100.
+ * \arg ay - pointer to ayemu_t structure
+ * \arg stereo_type - type of stereo
+ * \arg custom_eq - NULL or pointer to custom table of mixer layout.
+ * \retval 1 if OK, 0 if error occures.
  */
 int ayemu_set_stereo(ayemu_ay_t *ay, ayemu_stereo_t stereo_type, int *custom_eq)
 {
   int i;
   int chip;
 
-  if (!check_magic(ay)) return;
+  if (!check_magic(ay))
+    return 0;
 
   if (stereo_type != AYEMU_STEREO_CUSTOM && custom_eq != NULL) {
     ayemu_err = "Stereo type not custom, 'custom_eq' parametr must be NULL";
@@ -380,10 +391,10 @@ static void prepare_generation(ayemu_ay_t *ay)
 }
 
 
-/** Generate sound.
- *
+/*! Generate sound.
  * Fill sound buffer with current register data
  * Return value: pointer to next data in output sound buffer
+ * \retval \b 1 if OK, \b 0 if error occures.
  */
 void *ayemu_gen_sound(ayemu_ay_t *ay, void *buff, size_t sound_bufsize)
 {
@@ -393,7 +404,8 @@ void *ayemu_gen_sound(ayemu_ay_t *ay, void *buff, size_t sound_bufsize)
   int snd_numcount;
   unsigned char *sound_buf = buff;
 
-  if (!check_magic(ay)) return;
+  if (!check_magic(ay))
+    return 0;
 
   prepare_generation(ay);
 
