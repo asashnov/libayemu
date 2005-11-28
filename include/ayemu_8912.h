@@ -59,9 +59,7 @@ typedef struct
   int env_c;		/**< R10 bit 4 */
   int env_freq;		/**< R11, R12 */
   int env_style;	/**< R13 */
-}
-ayemu_regdata_t;
-
+} ayemu_regdata_t;
 
 /** Output sound format \internal */
 typedef struct

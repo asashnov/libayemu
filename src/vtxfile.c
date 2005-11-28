@@ -198,7 +198,7 @@ char *ayemu_vtx_load_data (ayemu_vtx_t *vtx)
  *
  * Return value: 1 if sucess, 0 if no enought data.
  */
-int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, char *regs)
+int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, unsigned char *regs)
 {
   int numframes = vtx->hdr.regdata_size / 14;
   if (vtx->pos++ >= numframes)
@@ -212,7 +212,7 @@ int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, char *regs)
   }
 }
 
-static void append_string(char *buf, const int sz, const char *str)
+static void append_string(char *buf, const unsigned int sz, const char *str)
 {
   if (strlen(buf) + strlen(str) < sz - 1)
     strcat(buf, str);
@@ -221,8 +221,8 @@ static void append_string(char *buf, const int sz, const char *str)
 static void append_number(char *buf, const int sz, const int num)
 {
   char s[32];
-  snprintf(s, sizeof(s), "%d", num);
-  return append_string(buf, sz, s);
+  sprintf(s, "%d", num);
+  append_string(buf, sz, s);
 }
 
 static void append_char(char *buf, const int sz, const char c)
@@ -248,7 +248,10 @@ static void append_char(char *buf, const int sz, const char c)
  * %F chip Freq
  * %P player freq
  */
-void ayemu_vtx_sprintname (const ayemu_vtx_t *vtx, char *const buf, const int sz, const char *fmt)
+void ayemu_vtx_sprintname (const ayemu_vtx_t *vtx,
+			   char *buf,
+			   const int sz,
+			   const char *fmt)
 {
   static char *stereo_types[] = { "MONO", "ABC", "ACB", "BAC", "BCA", "CAB", "CBA" };
 

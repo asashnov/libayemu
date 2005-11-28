@@ -72,12 +72,15 @@ EXTERN char *ayemu_vtx_load_data (ayemu_vtx_t *vtx);
 /** Get next 14-bytes frame of AY register data.
  * \return Return value: true if sucess, false if not enought data.
  */
-EXTERN int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, char *regs);
+EXTERN int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, unsigned char *regs);
   
 /** Print formated file name. If fmt is NULL the default format %a - %t will used
  * \return none.
  */
-EXTERN void ayemu_vtx_sprintname (const ayemu_vtx_t *vtx, char *buf, const int sz, const char *fmt);
+EXTERN void ayemu_vtx_sprintname (const ayemu_vtx_t *vtx,
+				  char *buf,
+				  const int sz,
+				  const char *fmt);
 
 /** Free all of allocaded resource for this file.
  * You must call this function on end work with vtx file
