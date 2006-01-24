@@ -19,6 +19,20 @@
   Alexander Sashnov 
   sashnov@ngs.ru
 */
+
+/*!
+ * \mainpage libayemu library
+ *
+ * Homepage on sourceforge.net: http://sourceforge.net/projects/libayemu
+ *
+ * This library will help you to add AY/YM music in your own game, demos, etc.
+ *
+ * For example of how to use it see playvtx and xmms-vtx packages.
+ *
+ * Python wrapper and example comming soon.
+ *
+ */
+
 #ifndef _AYEMU_H
 #define _AYEMU_H
 
