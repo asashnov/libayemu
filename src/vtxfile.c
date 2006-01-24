@@ -6,9 +6,11 @@
 
 #include "ayemu.h"
 
-/* defined in lh5dec.c */
-extern void lh5_decode(unsigned char *inp,unsigned char *outp,unsigned long original_size, unsigned long packed_size);
-
+/* LHA5 decoder, defined in lh5dec.c */
+extern void lh5_decode(unsigned char *inp,
+		       unsigned char *outp,
+		       unsigned long original_size,
+		       unsigned long packed_size);
 
 /* Read 8-bit integer from file.
  * Return 1 if error occurs
@@ -108,12 +110,14 @@ int ayemu_vtx_open (ayemu_vtx_t *vtx, const char *filename)
   vtx->regdata = NULL;
 
   if ((vtx->fp = fopen (filename, "rb")) == NULL) {
-    fprintf(stderr, "ayemu_vtx_open: Cannot open file %s: %s\n", filename, strerror(errno));
+    fprintf(stderr, "ayemu_vtx_open: Cannot open file %s: %s\n",
+	    filename, strerror(errno));
     return 0;
   }
 
   if (fread(buf, 2, 1, vtx->fp) != 1) {
-    fprintf(stderr,"ayemu_vtx_open: Can't read from %s: %s\n", filename, strerror(errno));
+    fprintf(stderr, "ayemu_vtx_open: Can't read from %s: %s\n",
+	    filename, strerror(errno));
     error = 1;
   }
 
@@ -125,11 +129,12 @@ int ayemu_vtx_open (ayemu_vtx_t *vtx, const char *filename)
   else if (strncmp (buf, "ym", 2) == 0)
     vtx->hdr.chiptype = AYEMU_YM;
   else {
-    fprintf (stderr, "File %s is _not_ VORTEX format!\nIt not begins from AY or YM.\n", filename);
+    fprintf (stderr, "File %s is _not_ VORTEX format!\n"
+	     "It not begins with 'AY' or 'YM' string.\n", filename);
     error = 1;
   }
 
-  /* read VTX header info in order format specified, see http:// ..... */
+  /* read VTX header info in order format specified */
   if (!error) error = read_byte(vtx->fp, &vtx->hdr.stereo);
   if (!error) error = read_word16(vtx->fp, &vtx->hdr.loop);
   if (!error) error = read_word32(vtx->fp, &vtx->hdr.chipFreq);
@@ -162,12 +167,16 @@ char *ayemu_vtx_load_data (ayemu_vtx_t *vtx)
   int c;
 
   if (vtx->fp == NULL) {
-    fprintf(stderr, "ayemu_vtx_load_data: tune file not open yet (do you call ayemu_vtx_open first?)\n");
+    fprintf(stderr, "ayemu_vtx_load_data: tune file not open yet"
+	    " (Hint: do you call ayemu_vtx_open first?)\n");
     return NULL;
   }
+
   packed_size = 0; 
   buf_alloc = 4096;
+
   packed_data = (char *) malloc (buf_alloc);
+
   /* read packed AY register data to end of file. */
   while ((c = fgetc (vtx->fp)) != EOF) {
     if (buf_alloc < packed_size) {              
@@ -182,37 +191,24 @@ char *ayemu_vtx_load_data (ayemu_vtx_t *vtx)
     packed_data[packed_size++] = c;
   }  
   fclose (vtx->fp);
+
   vtx->fp = NULL;
+
   if ((vtx->regdata = (char *) malloc (vtx->hdr.regdata_size)) == NULL) {
-    fprintf (stderr, "ayemu_vtx_load_data: Can allocate %d bytes for unpack register data\n", vtx->hdr.regdata_size);
+    fprintf (stderr, "ayemu_vtx_load_data: Can allocate %d bytes"
+	     " for unpack register data\n", vtx->hdr.regdata_size);
     free (packed_data);
     return NULL;
   }
   lh5_decode (packed_data, vtx->regdata, vtx->hdr.regdata_size, packed_size);
   free (packed_data);
-  vtx->pos = 0;
+
+  vtx->frames = vtx->hdr.regdata_size / 14;
+
   return vtx->regdata;
 }
 
-/** Get next 14-bytes frame of AY register data.
- *
- * Return value: 1 if sucess, 0 if no enought data.
- */
-int ayemu_vtx_get_next_frame (ayemu_vtx_t *vtx, unsigned char *regs)
-{
-  int numframes = vtx->hdr.regdata_size / 14;
-  if (vtx->pos++ >= numframes)
-    return 0;
-  else {
-    int n;
-    char *p = vtx->regdata + vtx->pos;
-    for(n = 0 ; n < 14 ; n++, p+=numframes)
-      regs[n] = *p;
-    return 1;
-  }
-}
-
-static void append_string(char *buf, const unsigned int sz, const char *str)
+static void append_string(char *buf, const int sz, const char *str)
 {
   if (strlen(buf) + strlen(str) < sz - 1)
     strcat(buf, str);
@@ -221,8 +217,8 @@ static void append_string(char *buf, const unsigned int sz, const char *str)
 static void append_number(char *buf, const int sz, const int num)
 {
   char s[32];
-  sprintf(s, "%d", num);
-  append_string(buf, sz, s);
+  snprintf(s, sizeof(s), "%d", num);
+  return append_string(buf, sz, s);
 }
 
 static void append_char(char *buf, const int sz, const char c)
@@ -233,27 +229,28 @@ static void append_char(char *buf, const int sz, const char c)
   buf[pos] = '\0';
 }
 
-/** Print formated file name. If fmt is NULL the default format %a - %t will used
- *
- * %% the % sign
- * %a author of song
- * %t song title
- * %y year
- * %f song from
- * %T Tracker
- * %C Comment
- * %s stereo type (ABC, BCA, ...)
- * %l 'looped' or 'non-looped'
- * %c chip type: 'AY' or 'YM'
- * %F chip Freq
- * %P player freq
+/** Print formated file name.
+ * If fmt string is NULL the following default format string will used:
+ * '%a - %t'. The format string have format like printf function.
+ * The following format specificator supported:
+ * - \b %% the % sign
+ * - \b %a author of song
+ * - \b %t song title
+ * - \b %y year
+ * - \b %f song from
+ * - \b %T Tracker
+ * - \b %C Comment
+ * - \b %s stereo type (ABC, BCA, ...)
+ * - \b %l 'looped' or 'non-looped'
+ * - \b %c chip type: 'AY' or 'YM'
+ * - \b %F chip Freq
+ * - \b %P player freq
  */
-void ayemu_vtx_sprintname (const ayemu_vtx_t *vtx,
-			   char *buf,
-			   const int sz,
-			   const char *fmt)
+void ayemu_vtx_sprintname (const ayemu_vtx_t *vtx, char *const buf,
+			   const int sz, const char *fmt)
 {
-  static char *stereo_types[] = { "MONO", "ABC", "ACB", "BAC", "BCA", "CAB", "CBA" };
+  static char *stereo_types[] =
+    { "MONO", "ABC", "ACB", "BAC", "BCA", "CAB", "CBA" };
 
   if (fmt == NULL)
     fmt = "%a - %t";
@@ -303,6 +300,27 @@ void ayemu_vtx_sprintname (const ayemu_vtx_t *vtx,
     } else {
       append_char(buf, sz, *fmt++);
     }
+  }
+}
+
+/** Get specified data frame by number.
+ *
+ */
+void ayemu_vtx_getframe(const ayemu_vtx_t *vtx, size_t frame_n,
+			       unsigned char *regs)
+{
+  int n;
+
+  if (frame_n >= vtx->frames)
+    return;
+
+  // calculate begin of data
+  char *p = vtx->regdata + frame_n;
+
+  // step is data size / 14
+  for(n = 0 ; n < 14 ; n++) {
+      regs[n] = *p;
+      p += vtx->frames;
   }
 }
 
