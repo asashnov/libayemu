@@ -1,0 +1,24 @@
+Source: libayemu
+Priority: optional
+Maintainer: Alexander Sashnov <sashnov@ngs.ru>
+Build-Depends: debhelper (>= 4.0.0), autotools-dev
+Standards-Version: 3.6.1
+Section: libs
+
+Package: libayemu-dev
+Section: libdev
+Architecture: any
+Depends: libayemu1 (= ${Source-Version})
+Description: AY/YM sound chip emulation library
+ This library emulates the AY/YM sound chip of was widely populary
+ 8-bits computers such as Sinclair's ZX Spectrum and others.
+ :
+ This package contains header to compile your programms with this library
+
+Package: libayemu1
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: AY/YM sound chip emulation library
+ This library emulates the AY/YM sound chip of was widely populary
+ 8-bits computers such as Sinclair's ZX Spectrum and others.
