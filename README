@@ -19,40 +19,6 @@ See also playvtx (vtx console player) and xmms-vtx (vtx xmms plugin).
 
 
 
-
-    Installation.
-
-For configure, make and install just do the following commands:
-	
-	tar xzf libayemu-*.tgz
-	cd libayemu
-	./configure
-	make
-	make install
-
-(last command requires the root privelegies).
-It will install library and headers in /usr/local/lib and /usr/local/include.
-See file INSTALL for read more about standard configure script options. 
-
-
-
-
-    Install latest version from CVS.
-
-You can download and install laters (under development) version of
-libayemu directly from CVS repository on sourceforge.net by following
-commands (this example for Linux/cygwin users):
-
-	cvs -d:pserver:anonymous@cvs.sf.net:/cvsroot/libayemu co libayemu
-	cd libayemu
-	sh bootstrap      # (for generate build script)
-	./configure
-	make
-	make install      # (with root privelegies)
-
-
-
-
     Using the library
 
 You can find several usage examplpes for this library:
