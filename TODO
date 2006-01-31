@@ -1,15 +1,11 @@
 AY/YM library:
 
- * upload to sourceforge, write annonce, samples of use library
-
- * create API documentation with doxygen
-
  * stereo type display by ABC, BCA, ... (not 0, 1, ...)
 
  * SDL demo (using threads, simplest for use, sample)
 
  * make a Win32 version (dynamic library and .h and .lib for VC6) with simple demo programm
 
- * write a RPM and Debian specs.
-
  * use flawfinder for detect possible flow in code
+
+ * write Python module
