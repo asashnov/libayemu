@@ -45,6 +45,7 @@ build-stamp:  config.status
 
 	# Add here commands to compile the package.
 	$(MAKE)
+	doxygen
 
 	touch build-stamp
 
@@ -73,7 +74,8 @@ install: build
 
 	# Add here commands to install the package into debian/tmp
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
-
+	mkdir -p $(CURDIR)/debian/tmp/usr/share/doc/libayemu/
+	cp -r $(CURDIR)/html $(CURDIR)/debian/tmp/usr/share/doc/libayemu/
 
 # Build architecture-independent files here.
 binary-indep: build install
