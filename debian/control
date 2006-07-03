@@ -6,7 +6,7 @@ Standards-Version: 3.6.1
 Section: libs
 
 Package: libayemu-dev
-Section: libdev
+Section: libdevel
 Architecture: any
 Depends: libayemu1 (= ${Source-Version})
 Description: AY/YM sound chip emulation library
