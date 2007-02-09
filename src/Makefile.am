@@ -3,7 +3,7 @@ libayemu_la_SOURCES     = ay8912.c lh5dec.c vtxfile.c
 
 ## info autobook, 11.4 Library Versioning
 libayemu_la_LDFLAGS     = -no-undefined -release 0.95 -version-info 0:0:0
-CPPFLAGS                = -Wall -I$(top_srcdir)/include
+AM_CPPFLAGS             = -Wall -I$(top_srcdir)/include
 
 check_PROGRAMS = test
-test_SOURCES = test.c ay8912.c
+test_SOURCES = test.c

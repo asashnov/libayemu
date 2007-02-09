@@ -31,6 +31,27 @@ Other examples (under SDL, win32) coming soon (volunteers?).
 
 
 
+   Building from CVS
+
+Requires: automake-1.10, autoconf-2.61, libtool-1.5, cvs2cl
+
+$ cvs -d:pserver:anonymous@libayemu.cvs.sourceforge.net:/cvsroot/libayemu login 
+$ cvs -z3 -d:pserver:anonymous@libayemu.cvs.sourceforge.net:/cvsroot/libayemu co -P libayemu
+$ cd libayemu
+$ cvs2cl
+$ sh bootstrap
+
+Now you can build from scratch:
+$ ./configure
+$ make
+$ sudo make install
+
+Or Debian package:
+$ dpkg-buildpackage -rfakeroot -us -uc
+
+Or RPM package:
+$ ???
+
 
     Other resources
 

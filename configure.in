@@ -8,9 +8,7 @@ AM_INIT_AUTOMAKE(libayemu, 0.9.5)
 
 # Checks for programs.
 AC_PROG_CC
-AC_PROG_RANLIB
 AC_PROG_LIBTOOL
-# ??? AM_PROG_LIBTOOL
 
 # Checks for libraries.
 

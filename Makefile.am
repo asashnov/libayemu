@@ -18,5 +18,5 @@ rpm: $(PACKAGE)-$(VERSION).tar.gz
 	rpm -ta $(PACKAGE)-$(VERSION).tar.gz
 
 # Run ldconfig after installing the library:
-install-hook:
+install-exec-hook:
 	-ldconfig

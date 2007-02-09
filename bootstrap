@@ -1,6 +1,9 @@
 #! /bin/sh
 
 set -x
+
+# cvs2cl   # automaticaly generate ChangeLog file from CVS log
+libtoolize
 aclocal
 autoheader
 automake --add-missing --include-deps --copy
