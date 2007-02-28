@@ -1,0 +1,53 @@
+Roman Scherbakov (V_Soft) is designer of this file format.
+This is the best format for storing interrupted music from different AY-3-8910/12
+and YM2149 based platforms.
+
+
+Offset	Size	Type	Description
+
+00	2	Word	VTX file identifier (ay or ym)
+			Its chip type by default:
+			this is 7961h or 31073 dec (ay)
+			this is 6D79h èëè 28025 dec (ym)
+02	1		Byte bit		Playing mode by default:
+			Bits 0–2 determine stereo mode:
+			0 – MONO, 1 – ABC, 2 – ACB, 3 – BAC,
+			4 – BCA, 5 – CAB, 6 – CBA (dec)
+03	2	Word	Loop VBL number (from zero =
+			beginning of melody).
+
+05	4	Dword	AY chip frequency for this melody
+			( for compatibility with non-Spectrum platforms)
+			Standard values:
+			ZX_Spectrum: 1773400 (or 001B0F58h)
+			Atari: 2000000 (or 001E8480h)
+			Amstrad CPC: 1000000 (or 000F4240h)
+09	1	Byte	Player frequency (VBL per sec).
+			Standard value 50 =
+			1/50 sec (20ms).
+10	2	Word	Year of composition creating.
+12	4	Dword	Size of not packed data.
+			Needed for unpacking.
+16	1..255	str	melody name
+??	1..255	str	author name
+??	1..255	str	Melody source program name
+??	1..255	str	Musical editor name
+??	1..255	str	Comment
+??	??	data	lha5-compressed data
+
+
+Remarks.
+
+1) Data compressed with LHA type 5. May to pack with LHA.EXE
+   (as YM files), but needed to cut header and last zero byte of compressed file.
+   Header of LHA-archive file is found at start of file.
+   Its length is value of first byte of header plus 2.
+
+2) After unpacking the data block is equivalent to YM3 data block.
+
+3) Type str in the upper table is 1...254 chars, must be ended with zero.
+
+VTX files can be converted from emulators sound dump files
+(for ZX Spectrum and MSX this is usually PSG-files).
+But last time you can find emulators, which can to dump music in VTX format too.
+One of them is Unreal Speccy by SMT.
