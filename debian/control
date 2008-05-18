@@ -1,8 +1,8 @@
 Source: libayemu
 Priority: optional
 Maintainer: Alexander Sashnov <sashnov@ngs.ru>
-Build-Depends: debhelper (>= 4.0.0), autotools-dev
-Standards-Version: 3.6.1
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, doxygen, cvs2cl
+Standards-Version: 3.6.2
 Section: libs
 
 Package: libayemu-dev

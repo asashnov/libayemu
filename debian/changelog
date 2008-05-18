@@ -1,4 +1,11 @@
-libayemu (0.9.5-1) unstable; urgency=low
+libayemu (1.0.0-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Alexander Sashnov <sashnov@ngs.ru>  Sun, 18 May 2008 15:02:10 +0700
+
+
+libayemu (0.9.5-1) experimental; urgency=low
 
   * Initial Release.
 
