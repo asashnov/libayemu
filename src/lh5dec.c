@@ -30,7 +30,7 @@ static unsigned short bitbuf;
 #endif
 
 static unsigned long origsize, compsize;
-static unsigned char *in_buf;
+static const unsigned char *in_buf;
 static unsigned char *out_buf;
 
 static unsigned short  subbitbuf;
@@ -266,7 +266,7 @@ static void decode(unsigned short count, unsigned char buffer[])
   }
 }
 
-void lh5_decode(unsigned char *inp, unsigned char *outp, unsigned long original_size, unsigned long packed_size)
+void lh5_decode(const unsigned char *inp, unsigned char *outp, unsigned long original_size, unsigned long packed_size)
 {
   unsigned short n;
   unsigned char *buffer;
@@ -275,6 +275,11 @@ void lh5_decode(unsigned char *inp, unsigned char *outp, unsigned long original_
   origsize = original_size;
   in_buf = inp;
   out_buf = outp;
+
+  fprintf(stderr, "DEBUG: compsize = %ld, origsize = %ld, first 8 bytes of packed data:\n", packed_size, original_size);
+  fprintf(stderr, "  %02x %02x %02x %02x  %02x %02x %02x %02x \n",
+	  *(inp), *(inp+1),*(inp+2),*(inp+3),
+	  *(inp+4),*(inp+5),*(inp+6),*(inp+7));
 
   buffer = (unsigned char *) malloc(DICSIZ);
   if (!buffer) error ("Out of memory");

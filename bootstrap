@@ -1,8 +1,13 @@
 #! /bin/sh
 
 set -x
+set -e
 
-# cvs2cl   # automaticaly generate ChangeLog file from CVS log
+if [ ! -f ChangeLog ] ; then
+  # automaticaly generate ChangeLog file from CVS log
+  cvs2cl
+fi
+
 libtoolize
 aclocal
 autoheader

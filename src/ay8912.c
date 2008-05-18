@@ -312,7 +312,7 @@ if (*(regs + r) > m) \
  *
  * You must pass array of char [14] to this function
  */
-void ayemu_set_regs(ayemu_ay_t *ay, unsigned char *regs)
+void ayemu_set_regs(ayemu_ay_t *ay, ayemu_ay_reg_frame_t regs)
 {
   if (!check_magic(ay)) return;
 

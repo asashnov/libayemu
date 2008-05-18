@@ -9,6 +9,12 @@
 
 BEGIN_C_DECLS
 
+// TODO: ayemu_ay_t - hide all private data, allocate it in init function.
+
+typedef unsigned char ayemu_ay_reg_frame_t[14];
+
+
+
 /** Types of stereo.
     The codes of stereo types used for generage sound. */
 typedef enum
@@ -138,7 +144,7 @@ EXTERN int
 ayemu_set_sound_format (ayemu_ay_t *ay, int freq, int chans, int bits);
 
 EXTERN void 
-ayemu_set_regs (ayemu_ay_t *ay, unsigned char *regs);
+ayemu_set_regs (ayemu_ay_t *ay, ayemu_ay_reg_frame_t regs);
 
 EXTERN void*
 ayemu_gen_sound (ayemu_ay_t *ay, void *buf, size_t bufsize);
