@@ -8,7 +8,7 @@ SUBDIRS = src include
 DIST_SUBDIRS = $(SUBDIRS)
 
 # All the rest of the distributed files
-EXTRA_DIST = libayemu.spec Doxyfile bootstrap RELEASENOTES
+EXTRA_DIST = libayemu.spec Doxyfile bootstrap RELEASENOTES vtx_format.txt
 
 # Rule to build tar-gzipped distribution package
 $(PACKAGE)-$(VERSION).tar.gz: dist
@@ -20,3 +20,7 @@ rpm: $(PACKAGE)-$(VERSION).tar.gz
 # Run ldconfig after installing the library:
 install-exec-hook:
 	-ldconfig
+
+# create distribute .tar.gz (source archive with autotools and ChangeLog files)
+#dist:
+#	tar czf $(PACKAGE)-$(VERSION).tar.gz --dereference $(DIST_SUBDIRS) $(EXTRA_DIST)
