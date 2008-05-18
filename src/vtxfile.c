@@ -3,6 +3,11 @@
 #include <errno.h>
 #include <assert.h>
 #include <ctype.h>
+#include <unistd.h>
+
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "ayemu.h"
 
@@ -23,7 +28,7 @@ static data_ptr_t read_byte(data_ptr_t pos, int *p)
 {
   const unsigned char *data = (const unsigned char*)pos;
   *p = *data++;
-  return data;
+  return (data_ptr_t)data;
 }
 
 /* Read 16-bit little-endian 1234 integer from file.
@@ -33,7 +38,7 @@ static data_ptr_t read_word16(data_ptr_t pos, int *p)
   const unsigned char *data = (const unsigned char*)pos;
   *p = *data++;
   *p += *data++ << 8;
-  return data;
+  return (data_ptr_t)data;
 }
 
 /* read 32-bit integer from file.
@@ -45,7 +50,7 @@ static data_ptr_t read_word32(data_ptr_t pos, int *p)
   *p += *data++ << 8;
   *p += *data++ << 16;
   *p += *data++ << 24;
-  return data;
+  return (data_ptr_t)data;
 }
 
 /* read_string: max 254 chars len (+1 for null terminator).
@@ -171,7 +176,7 @@ void ayemu_vtx_getframe(const ayemu_vtx_t *vtx, size_t frame_n, ayemu_ay_reg_fra
     return;
 
   // calculate begin of data
-  char *p = vtx->regdata + frame_n;
+  unsigned char *p = vtx->regdata + frame_n;
 
   // step is data size / 14
   for(n = 0 ; n < 14 ; n++) {
@@ -193,4 +198,86 @@ void ayemu_vtx_free(ayemu_vtx_t *vtx)
   FREE_PTR(vtx->tracker);
   FREE_PTR(vtx->comment);
   FREE_PTR(vtx->regdata);
+}
+
+
+
+
+ayemu_vtx_t * ayemu_vtx_header_from_file(const char *filename)
+{
+  ayemu_vtx_t *ret;
+  size_t size;
+  const size_t page_size = (size_t) sysconf (_SC_PAGESIZE);
+  int fd;
+  struct stat st;
+
+  // printf("Page size is %d\n", page_size);
+
+  if (stat(filename, &st) != 0) {
+    fprintf(stderr, "Can't stat file %s: %s\n", filename, strerror(errno));
+    return NULL;
+  }
+  size = st.st_size;
+
+  fd = open(filename, O_RDONLY, 0);
+  if (fd == 0) {
+    fprintf(stderr, "Can't open file %s: %s\n", filename, strerror(errno));
+    return NULL;
+  }
+
+  size_t data_len = (size / page_size + 1) * page_size;
+
+  char *data = mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, fd, 0);
+  if (data == (void*)(-1)) {
+    fprintf(stderr, "Can't mmap file %s: %s\n", filename, strerror(errno));
+    return NULL;
+  }
+
+  ret = ayemu_vtx_header(data, size);
+
+  if (munmap(data, data_len) != 0) {
+    fprintf(stderr, "Can't munmmap file %s: %s\n", filename, strerror(errno));
+  }
+
+  return ret;
+}
+
+
+ayemu_vtx_t * ayemu_vtx_load_from_file(const char *filename)
+{
+  size_t size;
+  const size_t page_size = (size_t) sysconf (_SC_PAGESIZE);
+  int fd;
+  struct stat st;
+  ayemu_vtx_t *ret;
+
+  // printf("Page size is %d\n", page_size);
+
+  if (stat(filename, &st) != 0) {
+    fprintf(stderr, "Can't stat file %s: %s\n", filename, strerror(errno));
+    return NULL;
+  }
+  size = st.st_size;
+
+  fd = open(filename, O_RDONLY, 0);
+  if (fd == 0) {
+    fprintf(stderr, "Can't open file %s: %s\n", filename, strerror(errno));
+    return NULL;
+  }
+
+  size_t data_len = (size / page_size + 1) * page_size;
+
+  char *data = mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, fd, 0);
+  if (data == (void*)(-1)) {
+    fprintf(stderr, "Can't mmap file %s: %s\n", filename, strerror(errno));
+    return NULL;
+  }
+
+  ret = ayemu_vtx_load(data, size);
+
+  if (munmap(data, data_len) != 0) {
+    fprintf(stderr, "Can't munmmap file %s: %s\n", filename, strerror(errno));
+  }
+
+  return ret;
 }
