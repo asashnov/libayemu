@@ -92,9 +92,15 @@ binary-arch: build install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs ChangeLog
+	# remove doxygen html documentation just after dh_installdocs
+	# copy it into debian/libayemu-dev package
+	# for avoid stop with error in dh_install - it says html docs
+	# exists but not installed anywhere.
 	dh_installdocs
+	rm -rf $(CURDIR)/debian/tmp/usr/share/doc/libayemu/html
+
 	dh_installexamples
-	dh_install --sourcedir=debian/tmp
+	dh_install --sourcedir=debian/tmp --fail-missing
 #	dh_installmenu
 #	dh_installdebconf	
 #	dh_installlogrotate
