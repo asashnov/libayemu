@@ -105,6 +105,7 @@ typedef struct
   int default_stereo_flag;	/**< =1 after init, resets in #ayemu_set_stereo() */
   int default_sound_format_flag; /**< =1 after init, resets in #ayemu_set_sound_format() */
   int dirty;			/**< dirty flag. Sets if any emulator properties changed */
+  int verbose;			/**< output warnings to stderr it not null */
 
   int bit_a;			/**< state of channel A generator */
   int bit_b;			/**< state of channel B generator */

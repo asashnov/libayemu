@@ -129,6 +129,7 @@ void ayemu_init(ayemu_ay_t *ay)
   ay->default_stereo_flag = 1;
   ay->default_sound_format_flag = 1;
   ay->dirty = 1;
+  ay->verbose = 0;
   ay->magic = MAGIC1;
 
   ayemu_reset(ay);
@@ -316,12 +317,14 @@ void ayemu_set_regs(ayemu_ay_t *ay, ayemu_ay_reg_frame_t regs)
 {
   if (!check_magic(ay)) return;
 
-  WARN_IF_REGISTER_GREAT_THAN(1,15);
-  WARN_IF_REGISTER_GREAT_THAN(3,15);
-  WARN_IF_REGISTER_GREAT_THAN(5,15);
-  WARN_IF_REGISTER_GREAT_THAN(8,31);
-  WARN_IF_REGISTER_GREAT_THAN(9,31);
-  WARN_IF_REGISTER_GREAT_THAN(10,31);
+  if (ay->verbose) {
+    WARN_IF_REGISTER_GREAT_THAN(1,15);
+    WARN_IF_REGISTER_GREAT_THAN(3,15);
+    WARN_IF_REGISTER_GREAT_THAN(5,15);
+    WARN_IF_REGISTER_GREAT_THAN(8,31);
+    WARN_IF_REGISTER_GREAT_THAN(9,31);
+    WARN_IF_REGISTER_GREAT_THAN(10,31);
+  }
 
   ay->regs.tone_a  = regs[0] + ((regs[1]&0x0f) << 8);
   ay->regs.tone_b  = regs[2] + ((regs[3]&0x0f) << 8);

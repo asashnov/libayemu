@@ -1,3 +1,9 @@
+    Release notes for libayemu-1.1.0
+
+  The library interface is changed, now it support read vtx file
+from memory, not only from libc 'FILE*' object.
+
+
     Release notes for libayemu-0.9.5
 
   The are many major changes from last 0.9 release:

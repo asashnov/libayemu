@@ -12,23 +12,21 @@ format documentation and samples of use the library API.
   VTX format is made for store AY/YM song in lha5 complession. This
 library can read sond info header and unpack lha5 compressed data from
 vtx file. There are thousands songs from games, magazins, demos
-available from other sources in internet. You can see
-http://vtx.microfor.ru/music.htm for example.
-
-See also playvtx (vtx console player) and xmms-vtx (vtx xmms plugin).
-
+available from other sources in internet.
 
 
     Using the library
 
-You can find several usage examplpes for this library:
-  * console VTX-file player: playvtx;
-  * custom register data set: test.c in src dir.
+  You can get some examples of using this library:
 
-Also there is a good doxygen format documentation available.
+    * custom register data set: test/test.c in source code;
+    * playvtx (console player)
+    * xmms-vtx (xmms input plugin)
+    * gstreamer-vtx (gstreamer plugin)
 
-Other examples (under SDL, win32) coming soon (volunteers?).
+  All of these resides on http://sourceforge.net/projects/libayemu/
 
+  Doxygen documentation is available.
 
 
    Building from CVS
@@ -38,15 +36,12 @@ Requires: automake-1.10, autoconf-2.61, libtool-1.5, cvs2cl
 $ cvs -d:pserver:anonymous@libayemu.cvs.sourceforge.net:/cvsroot/libayemu login 
 $ cvs -z3 -d:pserver:anonymous@libayemu.cvs.sourceforge.net:/cvsroot/libayemu co -P libayemu
 $ cd libayemu
-$ cvs2cl
 $ sh bootstrap
-
-Now you can build from scratch:
 $ ./configure
 $ make
 $ sudo make install
 
-Or Debian package:
+For build Debian/Ubuntu package just do following:
 $ dpkg-buildpackage -rfakeroot -us -uc
 
 Or RPM package:
@@ -55,16 +50,6 @@ $ ???
 
     Other resources
 
-On vtx.microfor.ru you can found vtx player for winamp (as plugin) and
-pocketPC.
+Huge archive with music in vtx format can be downloaded here:
 
-Warning: There is the large zip archive on vtx.microfor.ru:
-
-vtx_songs   23.65 Mb  ZX Spectrum Vortex Music SFX Archive v1.5
-
-But inside this zip the windows-executable self-extracting archive.
-So if you have problem with run it (if you use other than Windows (TM)
-operating system or you not want run not trusted executable from
-Internet) you can download it as plain zip archive by following link:
-
-http://sashnov.fanstvo.com/vtx_songs.zip  (27 Mb)
+http://sashnov.fanstvo.com/myfiles/vtx_songs.zip
