@@ -1,0 +1,13 @@
+Source: playvtx
+Section: sound
+Priority: optional
+Maintainer: Alexander Sashnov <sashnov@ngs.ru>
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, libayemu-dev
+Standards-Version: 3.6.2
+
+Package: playvtx
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Console VTX file player based on libayemu.
+  Console VTX file player based on libayemu.
+

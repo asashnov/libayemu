@@ -1,0 +1,11 @@
+playvtx (0.9.3) jaunty; urgency=low
+
+  * new upstream release
+
+ -- Alexander Sashnov <sashnov@ngs.ru>  Sun, 06 Sep 2009 02:38:25 +0700
+
+playvtx (0.9.2) experimental; urgency=low
+
+  * first build package
+
+ -- Alexander Sashnov <sashnov@ngs.ru>  Sun, 18 May 2008 17:37:02 +0700

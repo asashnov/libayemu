@@ -1,0 +1,50 @@
+dnl use autoconf to produce a configure script
+AC_INIT(xmms-vtx.c)
+# AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(xmms-vtx,0.9.1)
+
+AM_DISABLE_STATIC
+AM_PROG_LIBTOOL
+
+dnl check for programs
+AC_PROG_CC
+AC_PROG_INSTALL
+
+AC_PATH_PROG(XMMS_CONFIG_PATH,xmms-config,no)
+if test "x$XMMS_CONFIG_PATH" = "xno"; then
+	AC_MSG_ERROR([*** xmms-config not installed - please install first ***])
+fi
+
+dnl check for libraries
+AC_CHECK_LIB(m,main)
+
+AC_CHECK_LIB(ayemu, ayemu_init,,
+AC_MSG_ERROR(cannot find ayemu library. Check your ayemu library installation))
+AC_OUTPUT
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(stddef.h)
+AC_CHECK_HEADERS(ayemu.h,,
+AC_MSG_ERROR(cannot find ayemu.h. Check your ayemu library installation))
+AC_OUTPUT
+
+AM_PATH_GLIB(1.2.3,,AC_MSG_ERROR([*** GLIB >= 1.2.3 not installed - please install first ***]))
+AM_PATH_GTK(1.2.3,,AC_MSG_ERROR([*** GTK+ >= 1.2.3 not installed - please install first ***]))
+
+dnl check for typedefs, structs, and compiler characteristics
+AC_C_INLINE
+AC_TYPE_SIZE_T
+
+# Checks for library functions.
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([memset])
+
+XMMS_CFLAGS="$(xmms-config --cflags)"
+AC_SUBST(XMMS_CFLAGS)
+
+INPUT_PLUGIN_DIR="$(xmms-config --input-plugin-dir)"
+AC_SUBST(INPUT_PLUGIN_DIR)
+
+AC_OUTPUT(Makefile)

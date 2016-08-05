@@ -1,0 +1,15 @@
+Source: xmms-vtx
+Section: sound
+Priority: optional
+Maintainer: Alexander Sashnov <sashnov@ngs.ru>
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, libayemu-dev, libglib1.2-dev, libgtk1.2-dev, xmms-dev
+Standards-Version: 3.6.2
+
+Package: xmms-vtx
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Module for XMMS for play .vtx files (AY/YM music)
+ This library emulates the AY/YM sound chip of was widely populary
+ 8-bits computers such as Sinclair's ZX Spectrum and others.
+ :
+ This is module for play .vtx file in XMMS

@@ -1,0 +1,49 @@
+libvtx/XMMS - libvtx XMMS Plugin 0.7
+Copyright (C) 2002-2003 Sasnov Alexander <sashnov@ngs.ru>
+
+Website: http://sashnov.chat.ru/ayengine
+
+Description
+-----------
+libvtx is an XMMS input plugin. XMMS is a cross-platform multimedia
+player. VTX - Vortex format for AY/YM music by Roman Scherbakov.
+In folder music_sample you can find 10 tunes in this format,
+total time 31:15. More tunes could be found on 
+http://vtx.microfor.ru/music.htm
+and other places.
+
+Prerequisites
+-------------
+The following things are needed in order to compile this program:
+
+Item				Version
+----				-------
+pthreads (POSIX threads)	*
+xmms-devel			>= 0.9.5.1
+GLib				>= 1.2
+GTK				>= 1.2
+
+pthreads should have come with your system.
+
+XMMS can be obtained from http://www.xmms.org/.
+
+libxmms1-devel for Mandrake Linux 10.1 can be found here:
+http://rpm.pbone.net/index.php3/stat/4/idpl/2150084/com/libxmms1-devel-1.2.10-20mdk.i586.rpm.html
+(finded with rpmseek.com).
+
+GLib and GTK can be obtained from http://www.gtk.org/.
+
+to generate the build cruft and get the configure script. You need recent
+versions of autoconf, automake and libtool to do this.
+
+
+
+INSTALL NOTE: you can use
+
+  make local_install
+
+to install plugin in your $(HOME)/.xmms/Plugins dir.
+
+
+
+	- Sashnov Alexander <sashnov@ngs.ru>

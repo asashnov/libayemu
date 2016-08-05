@@ -1,0 +1,18 @@
+gstreamer VTX plugin
+
+Homepage: http://sashnov.nm.ru/libayemu.html
+
+
+Compile and run:
+
+tar xzf vtx-plugin-0.10.0.1.tar.gz
+cd vtx-plugin-0.10.0.1
+./configure
+make
+sh play.sh
+
+
+Note: Script 'play.sh' copies plugin to /.gstreamer-0.10/plugins
+so you not need root privelegies to install it.
+
+

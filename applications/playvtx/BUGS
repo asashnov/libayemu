@@ -1,0 +1,3 @@
+ * playvtx crashs on non-vtx format bynary files
+ * need show usage if empty file list given
+
