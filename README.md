@@ -27,7 +27,10 @@ $ ./configure
 
 $ make
 
+$ aoss ./test/test
+
 $ aoss ./apps/playvtx/playvtx music_sample/ritm-4.vtx
+
 
 
 ## Using the library
