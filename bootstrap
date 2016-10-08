@@ -4,7 +4,12 @@ set -x
 set -e
 
 libtoolize
+
+# generate 'configure' from 'aclocal.m4' and known AC_ macroses
 aclocal
-autoheader
-automake --add-missing --include-deps --copy
 autoconf
+
+autoheader
+
+# create Makefile.in and copy needed shell wrappers (install-sh, compile, depcomp, etc)
+automake --add-missing --include-deps --copy

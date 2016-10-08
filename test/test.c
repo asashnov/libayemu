@@ -3,8 +3,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <memory.h>
+
 
 /* Standard includes for OSS DSP using */
+/*
+ * Use 'aoss' wrapper from alsa-oss package:
+ * $ sudo apt-get install alsa-oss
+ * $ aoss ./test_libayemu
+ * (tested on Ubuntu 14.04)
+ */
+
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <fcntl.h>

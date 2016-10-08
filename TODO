@@ -2,10 +2,30 @@ AY/YM library:
 
  * stereo type display by ABC, BCA, ... (not 0, 1, ...)
 
+ * передискретизатор как в in_vtx 4 (опциональный)
+
+ * xmms2 plugin;
+
+ * music player daemon plugin
+
+ * finish gstreamer plugin
+
+ * fix deadbeef plugin
+
+ * Audacious plugin (GTK+ based Winamp clone) 
+
+ * Qmmp plugin (Qt-based Winamp clone)
+
+ * Amarok plugin
+
  * SDL demo (using threads, simplest for use, sample)
 
  * make a Win32 version (dynamic library and .h and .lib for VC6) with simple demo programm
 
+ * codec for Windows
+
  * use flawfinder for detect possible flow in code
 
- * write Python module
+ * write Python binding to libayemu
+
+ * Ubuntu PPA

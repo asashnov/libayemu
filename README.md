@@ -18,6 +18,18 @@ There are thousands songs from games, magazines, demos
 are available from on the Internet.
 
 
+
+## Compiling the sources, testing
+
+$ ./bootstrap
+
+$ ./configure
+
+$ make
+
+$ aoss ./apps/playvtx/playvtx music_sample/ritm-4.vtx
+
+
 ## Using the library
 
 You can get some examples of using this library:

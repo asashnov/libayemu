@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(src/ay8912.c)
+AC_INIT([libayemu], [1.1.0])
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(libayemu, 1.1.0)
+AM_INIT_AUTOMAKE
 
 # Options
 # AC_ARG_ENABLE
@@ -30,5 +30,4 @@ AC_CHECK_FUNCS([memset])
 AC_CHECK_HEADERS([fcntl.h]) 
 AC_CHECK_HEADERS([sys/ioctl.h])
 
-AC_OUTPUT(Makefile src/Makefile include/Makefile)
-
+AC_OUTPUT(Makefile include/Makefile src/Makefile test/Makefile apps/Makefile apps/playvtx/Makefile)
