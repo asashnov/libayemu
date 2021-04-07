@@ -17,6 +17,13 @@ You will also find VTX file description inside.
 There are thousands songs from games, magazines, demos
 are available from on the Internet.
 
+## DeadBeef
+
+This code also is a part of a standard plugins pack in DeadBeef music player:
+
+https://deadbeef.sourceforge.io/
+
+Check it out!
 
 
 ## Compiling the sources, testing
