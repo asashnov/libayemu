@@ -38,6 +38,7 @@ static const int DEBUG = 0;
 struct option options[] = {
   { "quiet",   no_argument, NULL, 'q'},
   { "rand",    no_argument, NULL, 'Z'},
+  { "taganrog",no_argument, NULL, 'T'},
   { "stdout",  no_argument, NULL, 's'},
   { "verbose", no_argument, NULL, 'v'},
   { "version", no_argument, NULL, 'V'},
@@ -46,10 +47,11 @@ struct option options[] = {
   { 0, 0, 0, 0}
 };
 
-char short_opts[] = "+qZsvuh";
+char short_opts[] = "+qZTsvuh";
 
 int qflag = 0;  // quite plating
 int Zflag = 0;  // random list
+int Tflag = 0;
 int sflag = 0;  // to stdout
 int vflag = 0;  // verbose
 
@@ -73,6 +75,7 @@ void usage ()
 	   "Usage: playvtx [option(s)] files...\n"
 	   "  -q --quiet\tquiet (don't print title)\n"
 	   "  -Z --random\tshuffle play\n"
+       "  -T --taganrog\tForce use 3.5 MHz AY frequency as in Taganrog ZX clone\n"
 	   "  -s --stdout\twrite to stdout\n"
 	   "  -v --verbose\tincrease verbosity level\n"
 	   "  --version\tshow programm version\n"
@@ -131,8 +134,12 @@ void play (const char *filename)
 
   ayemu_reset(&ay);
   ayemu_set_chip_type(&ay, vtx->chiptype, NULL);
-  ayemu_set_chip_freq(&ay, vtx->chipFreq);
   ayemu_set_stereo(&ay, vtx->stereo, NULL);
+
+  if (!Tflag)
+    ayemu_set_chip_freq(&ay, vtx->chipFreq);
+  else
+    ayemu_set_chip_freq(&ay, 3500000); // in Taganrog AY freq got from the same pin as for Z80 CPU
 
   size_t pos = 0;
 
@@ -167,6 +174,9 @@ int main (int argc, char **argv)
 	break;
       case 'Z':
 	Zflag = 1;
+	break;
+      case 'T':
+	Tflag = 1;
 	break;
       case 's':
 	sflag = 1;
