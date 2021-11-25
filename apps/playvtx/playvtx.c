@@ -84,7 +84,17 @@ void usage ()
 void init_oss()
 {
   if ((audio_fd = open(DEVICE_NAME, O_WRONLY, 0)) == -1) {
-    fprintf (stderr, "Can't open /dev/dsp\n");
+    fprintf (stderr,
+        "Unable to initialize OSS sound system: unable to open /dev/dsp\n"
+        "\n"
+        "Probably you are running a modern Linux with ALSA or PulseAudio.\n"
+        "\n"
+        "On systems with PulseAudio, such as Ubuntu, run with:\n"
+        "  $ padsp playvtx music_sample/secret.vtx \n"
+        "\n"
+        "On systems with ALSA use alsa-oss wrapper:\n"
+        "  $ aoss playvtx music_sample/secret.vtx \n"
+        );
   }
   else if (ioctl(audio_fd, SNDCTL_DSP_SETFMT, &bits) == -1) {
     fprintf (stderr, "Can't set sound format\n");
