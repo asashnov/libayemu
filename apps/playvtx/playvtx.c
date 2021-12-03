@@ -51,16 +51,16 @@ char short_opts[] = "+qZTsvuh";
 
 int qflag = 0;  // quite plating
 int Zflag = 0;  // random list
-int Tflag = 0;
+int Tflag = 0;  // Taganrog, 3.5 MHz
 int sflag = 0;  // to stdout
 int vflag = 0;  // verbose
 
 ayemu_ay_t ay;
 ayemu_ay_reg_frame_t regs;
 
-void *audio_buf;
+void *audio_buf = NULL;
 int audio_bufsize;
-int audio_fd;
+int audio_fd = STDOUT_FILENO;
 
 int  freq = 44100;
 int  chans = 2;
@@ -76,7 +76,10 @@ void usage ()
 	   "  -q --quiet\tquiet (don't print title)\n"
 	   "  -Z --random\tshuffle play\n"
        "  -T --taganrog\tForce use 3.5 MHz AY frequency as in Taganrog ZX clone\n"
-	   "  -s --stdout\twrite to stdout\n"
+	   "  -s --stdout\twrite sound data to stdout in .au format\n"
+       "        You may then convert it to mp3 by:\n"
+       "        playvtx --stdout secret.vtx > secret.raw\n"
+       "        sox -r 44100 -e signed -b 16 -c 2 secret.raw secret.mp3\n"
 	   "  -v --verbose\tincrease verbosity level\n"
 	   "  --version\tshow programm version\n"
 	   "  -h --help\n"
@@ -125,7 +128,7 @@ void play (const char *filename)
   if (!qflag)
     printf(" Title: %s\n Author: %s\n From: %s\n Comment: %s\n Year: %d\n",
 	   vtx->title, vtx->author, vtx->from, vtx->comment, vtx->year);
-  
+
   int audio_bufsize = freq * chans * (bits >> 3) / vtx->playerFreq;
   if ((audio_buf = malloc (audio_bufsize)) == NULL) {
     fprintf (stderr, "Can't allocate sound buffer\n");
@@ -163,9 +166,9 @@ int main (int argc, char **argv)
   int index;
   int c;
   int option_index = 0;
-	   
+
   opterr = 0;
-     
+
   while ((c = getopt_long (argc, argv, short_opts, options, &option_index)) != -1)
     switch (c)
       {
@@ -205,11 +208,11 @@ int main (int argc, char **argv)
       default:
 	abort ();
       }
-     
+
   if (DEBUG)
-    printf ("qflag = %d, Zflag = %d, sflag = %d, vflag = %d\n", 
+    printf ("qflag = %d, Zflag = %d, sflag = %d, vflag = %d\n",
 	    qflag, Zflag, sflag, vflag);
-     
+
   if (Zflag)
     printf ("The -Z flag is not implemented yet, sorry\n");
 
@@ -219,8 +222,10 @@ int main (int argc, char **argv)
     exit (1);
   }
 
-  init_oss();
-  if (DEBUG) 
+  if (! sflag)
+    init_oss();
+
+  if (DEBUG)
     printf ("OSS sound system initialization success: bits=%d, chans=%d, freq=%d\n",
 	    bits, chans, freq);
 
