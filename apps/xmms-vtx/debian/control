@@ -1,7 +1,7 @@
 Source: xmms-vtx
 Section: sound
 Priority: optional
-Maintainer: Alexander Sashnov <sashnov@ngs.ru>
+Maintainer: Alexander Sashnov <asashnov@rambler.ru>
 Build-Depends: debhelper (>= 4.0.0), autotools-dev, libayemu-dev, libglib1.2-dev, libgtk1.2-dev, xmms-dev
 Standards-Version: 3.6.2
 

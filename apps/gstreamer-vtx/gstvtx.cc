@@ -62,7 +62,7 @@ GstElementDetails vtx_details = {
   (char*)"Vtx",
   (char*)"Codec/Decoder/Audio",
   (char*)"AY Vtx file decoder based on libayemu",
-  (char*)"Alexander Sashnov <sashnov@ngs.ru>"
+  (char*)"Alexander Sashnov <asashnov@rambler.ru>"
 };
 
 enum

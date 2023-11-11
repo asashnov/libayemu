@@ -1,7 +1,7 @@
 Source: playvtx
 Section: sound
 Priority: optional
-Maintainer: Alexander Sashnov <sashnov@ngs.ru>
+Maintainer: Alexander Sashnov <asashnov@rambler.ru>
 Build-Depends: debhelper (>= 4.0.0), autotools-dev, libayemu-dev
 Standards-Version: 3.6.2
 

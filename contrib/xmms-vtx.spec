@@ -4,7 +4,7 @@ Version: 1.0
 Release: avl1
 Group: Multimedia/Sound
 License: GPL
-Packager: Sashnov Alexander <sashnov@ngs.ru>
+Packager: Sashnov Alexander <asashnov@rambler.ru>
 Url: http://sashnov.nm.ru/xmms-vtx.html
 Source: http://sashnov.nm.ru/files/
 Requires: xmms >= 1.2.0 libayemu >= 0.9.0

@@ -8,7 +8,7 @@ Version: %{version}
 Release: %{release}
 Group: Multimedia/Sound
 License: GPL
-Packager: Sashnov Alexander <sashnov@ngs.ru>
+Packager: Sashnov Alexander <asashnov@rambler.ru>
 Url: http://sashnov.nm.ru/libayemu.html
 Source0: http://sashnov.fanstvo.com/%{name}-%{version}.tar.gz
 Source1: %{name}-%{version}.tar.gz
@@ -42,5 +42,5 @@ rm -rf %{buildroot}
 %{_bindir}/playvtx
 
 %changelog
-* Thu Feb 10 2005 Alexander Sashnov <sashnov@ngs.ru>
+* Thu Feb 10 2005 Alexander Sashnov <asashnov@rambler.ru>
   - Start this spec file.

@@ -12,7 +12,7 @@ vtx_about (void)
   box = xmms_show_message (_("About Vortex Player"),
 			   _
 			   ("Vortex file format player by \n"
-			    "Sashnov Alexander <sashnov@ngs.ru>\n"
+			    "Sashnov Alexander <asashnov@rambler.ru>\n"
 			    "Founded on original source in_vtx.dll by \n"
 			    "Roman Sherbakov <v_soft@microfor.ru>\n"
 			    "\n"

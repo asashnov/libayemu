@@ -5,6 +5,6 @@ Roman Scherbakov <v_soft@nm.ru>
     based on libayemu code and sound resampling library
   * helped to debug C code of this library
 
-Sashnov Alexander <sashnov@ngs.ru>
+Sashnov Alexander <asashnov@rambler.ru>
   * started to rewrite 'in_vtx' plugin for xmms on Linux
   * started 'libayemu' project on sourceforge

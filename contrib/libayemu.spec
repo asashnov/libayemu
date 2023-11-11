@@ -10,7 +10,7 @@ License: GPL
 Group: System Environment/Libraries
 Source0: http://sashnov.fanstvo.com/%{name}-%{version}.tar.gz
 Source1: %{name}-%{version}.tar.gz
-Packager: Sashnov Alexander <sashnov@ngs.ru>
+Packager: Sashnov Alexander <asashnov@rambler.ru>
 URL: http://sashnov.nm.ru/libayemu.html
 BuildRoot: %{_tmppath}/%{name}-root
 Requires: /sbin/ldconfig
@@ -63,9 +63,9 @@ ldconfig
 /%{_libdir}/libayemu.a*
 
 %changelog
-* Wed Sep 21 2005 Alexander Sashnov <sashnov@ngs.ru>
+* Wed Sep 21 2005 Alexander Sashnov <asashnov@rambler.ru>
   - split package to two: libayemu and libayemu-devel
-* Thu Feb 10 2005 Alexander Sashnov <sashnov@ngs.ru>
+* Thu Feb 10 2005 Alexander Sashnov <asashnov@rambler.ru>
   - Start rpm spec written
 
 # LANG=C date +"%a %b %d %Y"

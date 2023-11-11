@@ -2,7 +2,7 @@ libayemu (1.1.0) jaunty; urgency=low
 
   * New upstream release
 
- -- Alexander Sashnov <sashnov@ngs.ru>  Sun, 06 Sep 2009 01:14:52 +0700
+ -- Alexander Sashnov <asashnov@rambler.ru>  Sun, 06 Sep 2009 01:14:52 +0700
 
 libayemu (1.0.0-1) experimental; urgency=low
 
